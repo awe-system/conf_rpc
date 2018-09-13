@@ -1,0 +1,119 @@
+{
+using namespace std;
+typedef enum
+{
+    ERROR_TYPE_OK = 0,
+    ERROR_TYPE_PARSE_ERROR = 951,
+    ERROR_TYPE_WRONG_TYPE,
+    ERROR_TYPE_UNKOWN  = 999,
+} ERROR_T;
+
+class event_handler;
+
+class dispatch_event
+{
+private:
+    event_handler *handler;
+private:
+   void get_string(rapidjson::Document &document, string &key, string &val);
+
+   void get_int(rapidjson::Document &document, string &key, int &val);
+
+   void get_uint(rapidjson::Document &document, string &key, unsigned int &val);
+
+   void get_long(rapidjson::Document &document, string &key, long &val);
+
+   void get_ulong(rapidjson::Document &document, string &key, unsigned long &val);
+
+   void get_bool(rapidjson::Document &document, string &key, bool &val);
+
+   void get_string_list(rapidjson::Document &document, string &key, list<string> &str_list);
+
+   void get_string_vec(rapidjson::Document &document, string &key, vector<string> &str_vec);
+
+   void get_string_map(rapidjson::Document &document, string &key, map<string,string> &str_map);
+
+   void put_string(rapidjson::Document &document, string &key, string &val);
+
+   void put_int(rapidjson::Document &document, string &key, int &val);
+
+   void put_uint(rapidjson::Document &document, string &key, unsigned int &val);
+
+   void put_long(rapidjson::Document &document, string &key, long &val);
+
+   void put_ulong(rapidjson::Document &document, string &key, unsigned long &val);
+
+   void put_bool(rapidjson::Document &document, string &key, bool val);
+
+   void put_string_list(rapidjson::Document &document, string &key, list<string> &str_list);
+
+   void put_string_vec(rapidjson::Document &document, string &key, vector<string> &str_vec);
+
+   void put_string_map(rapidjson::Document &document, string &key, map<string,string> &str_map);
+
+   void put_json_obj(rapidjson::Document &document, string &key, json_obj &obj);
+
+   void loads(rapidjson::Document &document, string &input);
+
+   void dumps(rapidjson::Document &document, string &output);
+
+   void put_err(rapidjson::Document &document, int err);
+
+public:
+    dispatch_event(event_handler *_handler);
+
+    void do_func(string &input, string &output);
+};
+
+
+static char END_DELIM[2]{EOF, 0};
+
+class session : public boost::enable_shared_from_this<session>
+{
+private:
+    boost::asio::streambuf sbuf_in;
+    boost::asio::local::stream_protocol::socket socket_;
+    dispatch_event *p_event;
+public:
+    session(dispatch_event *p_event, boost::asio::io_service &io_service);
+
+    boost::asio::local::stream_protocol::socket &socket();
+
+    void start();
+
+    void handle_read(const boost::system::error_code &error);
+
+    void handle_write(const boost::system::error_code &error);
+};
+
+typedef boost::shared_ptr<session> session_ptr;
+extern std::string socketpath;
+class file_init
+{
+public:
+    std::string _name;
+
+    file_init()
+    {
+        _name = socketpath;
+        std::remove(_name.c_str());
+    }
+};
+
+class event : public boost::enable_shared_from_this<event>
+{
+private:
+    file_init _file;
+    boost::asio::io_service _io_service;
+    dispatch_event _handler;
+    boost::asio::local::stream_protocol::acceptor _acceptor;
+
+public:
+    event(event_handler *p_event_handler);
+
+    void handle_accept(boost::shared_ptr<session> new_session, boost::system::error_code error);
+};
+
+class event_handler
+{
+public:

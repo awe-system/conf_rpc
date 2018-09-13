@@ -1,0 +1,411 @@
+
+session::session(dispatch_event *p_event, boost::asio::io_service &io_service) :
+        p_event(p_event),
+        socket_(io_service)
+{
+}
+
+boost::asio::local::stream_protocol::socket &session::socket()
+{
+    return socket_;
+}
+
+void session::start()
+{
+    try
+    {
+        boost::asio::async_read_until(socket_, sbuf_in, END_DELIM,
+                                      boost::bind(&session::handle_read, shared_from_this(),
+                                                  boost::asio::placeholders::error));
+    } catch (std::exception &e)
+    {
+    }
+}
+
+void session::handle_read(const boost::system::error_code &error)
+{
+    if ( !error )
+    {
+        std::string cmd_line;
+        std::string data_out;
+        std::istream is(&sbuf_in);
+        std::getline(is, cmd_line);
+        unsigned long pos = cmd_line.find(END_DELIM);
+        cmd_line = cmd_line.substr(0, pos);
+        std::cout << cmd_line << std::endl;
+        p_event->do_func(cmd_line, data_out);
+        boost::asio::async_write(socket_, boost::asio::buffer(data_out),
+                                 boost::bind(&session::handle_write,
+                                             shared_from_this(),
+                                             boost::asio::placeholders::error));
+    }
+}
+
+void session::handle_write(const boost::system::error_code &error)
+{
+    if ( !error )
+    {
+        try
+        {
+            boost::asio::async_read_until(socket_, sbuf_in, END_DELIM,
+                                          boost::bind(&session::handle_read, shared_from_this(),
+                                                      boost::asio::placeholders::error));
+        } catch (std::exception &e)
+        {
+        }
+    }
+
+}
+
+event::event(event_handler *p_event_handler) :
+        _file(),
+        _io_service(),
+        _handler(p_event_handler),
+        _acceptor(_io_service, boost::asio::local::stream_protocol::endpoint(_file._name))
+{
+    session_ptr new_session(new session(&_handler, _io_service));
+    _acceptor.async_accept(new_session->socket(),
+                           boost::bind(&event::handle_accept, this, new_session,
+                                       boost::asio::placeholders::error));
+    boost::thread(boost::bind(&boost::asio::io_service::run, &_io_service));
+}
+
+void event::handle_accept(boost::shared_ptr<session> new_session, boost::system::error_code error)
+{
+    if ( !error )
+    {
+        new_session->start();
+    }
+
+    new_session.reset(new session(&_handler, _io_service));
+    _acceptor.async_accept(new_session->socket(), boost::bind(&event::handle_accept, this, new_session,
+                                                              boost::asio::placeholders::error));
+}
+
+
+dispatch_event::dispatch_event(event_handler *_handler) : handler(_handler)
+{
+}
+
+void dispatch_event::get_string(rapidjson::Document &document, string &key, string &val)
+{
+    rapidjson::Value &value = document[key.c_str()];
+    if ( !value.IsString())
+    {
+        throw (int)-ERROR_TYPE_WRONG_TYPE;
+    }
+    val = value.GetString();
+}
+
+void dispatch_event::get_int(rapidjson::Document &document, string &key, int &val)
+{
+    rapidjson::Value &value = document[key.c_str()];
+    if ( !value.IsInt())
+    {
+        throw (int)-ERROR_TYPE_WRONG_TYPE;
+    }
+    val = value.GetInt();
+}
+
+void dispatch_event::get_uint(rapidjson::Document &document, string &key, unsigned int &val)
+{
+    rapidjson::Value &value = document[key.c_str()];
+    if ( !value.IsUint())
+    {
+        throw (int)-ERROR_TYPE_WRONG_TYPE;
+    }
+    val = value.GetUint();
+}
+
+void dispatch_event::get_long(rapidjson::Document &document, string &key, long &val)
+{
+    rapidjson::Value &value = document[key.c_str()];
+    if ( !value.IsInt64())
+    {
+        throw (int)-ERROR_TYPE_WRONG_TYPE;
+    }
+    val = value.GetInt64();
+}
+
+void dispatch_event::get_ulong(rapidjson::Document &document, string &key, unsigned long &val)
+{
+    rapidjson::Value &value = document[key.c_str()];
+    if ( !value.IsUint64())
+    {
+        throw (int)-ERROR_TYPE_WRONG_TYPE;
+    }
+    val = value.GetUint64();
+}
+
+void dispatch_event::get_bool(rapidjson::Document &document, string &key, bool &val)
+{
+    rapidjson::Value &value = document[key.c_str()];
+    if ( !value.IsBool())
+    {
+        throw (int)-ERROR_TYPE_WRONG_TYPE;
+    }
+    val = value.GetBool();
+}
+
+void dispatch_event::get_string_list(rapidjson::Document &document, string &key, list<string> &str_list)
+{
+    rapidjson::Value &value = document[key.c_str()];
+    if ( !value.IsArray())
+    {
+        throw (int)-ERROR_TYPE_WRONG_TYPE;
+    }
+
+    for ( rapidjson::SizeType i = 0; i < value.Size(); ++i )
+    {
+        rapidjson::Value &i_val = value[i];
+        if ( !i_val.IsString())
+        {
+            throw (int)-ERROR_TYPE_WRONG_TYPE;
+        }
+        str_list.push_back(value[i].GetString());
+    }
+}
+
+void dispatch_event::get_string_vec(rapidjson::Document &document, string &key, vector<string> &str_vec)
+{
+    rapidjson::Value &value = document[key.c_str()];
+    if ( !value.IsArray())
+    {
+        throw (int)-ERROR_TYPE_WRONG_TYPE;
+    }
+
+    for ( rapidjson::SizeType i = 0; i < value.Size(); ++i )
+    {
+        rapidjson::Value &i_val = value[i];
+        if ( !i_val.IsString())
+        {
+            throw (int)-ERROR_TYPE_WRONG_TYPE;
+        }
+        str_vec.push_back(value[i].GetString());
+    }
+}
+
+void dispatch_event::get_string_map(rapidjson::Document &doc, string &key, map<string,string> &str_map)
+{
+    rapidjson::Value &value = doc[key.c_str()];
+    if ( !value.IsObject())
+    {
+        throw (int)-ERROR_TYPE_WRONG_TYPE;
+    }
+    for ( rapidjson::Value::ConstMemberIterator itr = value.MemberBegin();
+          itr != value.MemberEnd();
+          ++itr )
+    {
+        const string &key = itr->name.GetString();
+        const string &val = itr->value.GetString();
+        str_map.insert(std::pair <string, string>(key,val));
+    }
+}
+
+void dispatch_event::put_string(rapidjson::Document &document, string &key, string &val)
+{
+    rapidjson::Value v_key(rapidjson::kObjectType);
+    v_key.SetString(key.c_str(), (rapidjson::SizeType) key.length(), document.GetAllocator());
+
+    rapidjson::Value v_val(rapidjson::kObjectType);
+    v_val.SetString(val.c_str(), (rapidjson::SizeType) val.length(), document.GetAllocator());
+
+    document.AddMember(v_key, v_val, document.GetAllocator());
+}
+
+void dispatch_event::put_int(rapidjson::Document &document, string &key, int &val)
+{
+    rapidjson::Value v_key(rapidjson::kObjectType);
+    v_key.SetString(key.c_str(), (rapidjson::SizeType) key.length(), document.GetAllocator());
+
+    rapidjson::Value v_val(rapidjson::kObjectType);
+    v_val.SetInt(val);
+
+    document.AddMember(v_key, v_val, document.GetAllocator());
+}
+
+void dispatch_event::put_uint(rapidjson::Document &document, string &key, unsigned int &val)
+{
+    rapidjson::Value v_key(rapidjson::kObjectType);
+    v_key.SetString(key.c_str(), (rapidjson::SizeType) key.length(), document.GetAllocator());
+
+    rapidjson::Value v_val(rapidjson::kObjectType);
+    v_val.SetUint(val);
+
+    document.AddMember(v_key, v_val, document.GetAllocator());
+}
+
+void dispatch_event::put_long(rapidjson::Document &document, string &key, long &val)
+{
+    rapidjson::Value v_key(rapidjson::kObjectType);
+    v_key.SetString(key.c_str(), (rapidjson::SizeType) key.length(), document.GetAllocator());
+
+    rapidjson::Value v_val(rapidjson::kObjectType);
+    v_val.SetInt64(val);
+
+    document.AddMember(v_key, v_val, document.GetAllocator());
+}
+
+void dispatch_event::put_ulong(rapidjson::Document &document, string &key, unsigned long &val)
+{
+    rapidjson::Value v_key(rapidjson::kObjectType);
+    v_key.SetString(key.c_str(), (rapidjson::SizeType) key.length(), document.GetAllocator());
+
+    rapidjson::Value v_val(rapidjson::kObjectType);
+    v_val.SetUint64(val);
+
+    document.AddMember(v_key, v_val, document.GetAllocator());
+}
+
+void dispatch_event::put_bool(rapidjson::Document &document, string &key, bool val)
+{
+    rapidjson::Value v_key(rapidjson::kObjectType);
+    v_key.SetString(key.c_str(), (rapidjson::SizeType) key.length(), document.GetAllocator());
+
+    rapidjson::Value v_val(rapidjson::kObjectType);
+    v_val.SetBool(val);
+
+    document.AddMember(v_key, v_val, document.GetAllocator());
+}
+
+void dispatch_event::put_string_list(rapidjson::Document &document, string &key, list<string> &str_list)
+{
+    rapidjson::Value v_key(rapidjson::kObjectType);
+    v_key.SetString(key.c_str(), (rapidjson::SizeType) key.length(), document.GetAllocator());
+
+    rapidjson::Value v_array(rapidjson::kObjectType);
+    v_array.SetArray();
+
+    for ( std::list<std::string>::iterator it = str_list.begin(); it != str_list.end(); it++ )
+    {
+        rapidjson::Value v_tmp(rapidjson::kObjectType);
+        v_tmp.SetString((*it).c_str(), (rapidjson::SizeType) (*it).length(), document.GetAllocator());
+        v_array.PushBack(v_tmp, document.GetAllocator());
+    }
+
+    document.AddMember(v_key, v_array, document.GetAllocator());
+}
+
+void dispatch_event::put_string_vec(rapidjson::Document &document, string &key, vector<string> &str_vec)
+{
+    rapidjson::Value v_key(rapidjson::kObjectType);
+    v_key.SetString(key.c_str(), (rapidjson::SizeType) key.length(), document.GetAllocator());
+
+    rapidjson::Value v_array(rapidjson::kObjectType);
+    v_array.SetArray();
+
+    for ( std::vector<std::string>::iterator it = str_vec.begin(); it != str_vec.end(); it++ )
+    {
+        rapidjson::Value v_tmp(rapidjson::kObjectType);
+        v_tmp.SetString((*it).c_str(), (rapidjson::SizeType) (*it).length(), document.GetAllocator());
+        v_array.PushBack(v_tmp, document.GetAllocator());
+    }
+
+    document.AddMember(v_key, v_array, document.GetAllocator());
+}
+
+void dispatch_event::put_string_map(rapidjson::Document &document, string &key, map<string,string> &str_map)
+{
+    rapidjson::Value v_key(rapidjson::kObjectType);
+    v_key.SetString(key.c_str(), (rapidjson::SizeType) key.length(), document.GetAllocator());
+
+    rapidjson::Value v_map(rapidjson::kObjectType);
+    v_map.SetObject();
+
+    for ( std::map<std::string,std::string>::iterator it = str_map.begin(); it != str_map.end(); it++ )
+    {
+        rapidjson::Value tmp_key(rapidjson::kObjectType);
+        rapidjson::Value tmp_val(rapidjson::kObjectType);
+        tmp_key.SetString(it->first.c_str(), (rapidjson::SizeType) it->first.length(), document.GetAllocator());
+        tmp_val.SetString(it->second.c_str(), (rapidjson::SizeType) it->second.length(), document.GetAllocator());
+
+        v_map.AddMember(tmp_key, tmp_val,document.GetAllocator());
+    }
+
+    document.AddMember(v_key, v_map, document.GetAllocator());
+}
+
+void dispatch_event::put_json_obj(rapidjson::Document &document, string &key, json_obj &obj)
+{
+    rapidjson::Value v_key(rapidjson::kObjectType);
+    v_key.SetString(key.c_str(), (rapidjson::SizeType) key.length(), document.GetAllocator());
+    
+    rapidjson::Value val(rapidjson::kObjectType);
+    if ( obj.type() == json_obj_type_array )
+    {
+        obj.dump_array(document, val);
+    }
+    else if ( obj.type() == json_obj_type_dic )
+    {
+        obj.dump_dic(document, val);
+    }
+    else if ( obj.type() == json_obj_type_bool )
+    {
+        obj.dump_bool(document, val);
+    }
+    else if ( obj.type() == json_obj_type_int )
+    {
+        obj.dump_int(document, val);
+    }
+    else if ( obj.type() == json_obj_type_llong )
+    {
+        obj.dump_llong(document, val);
+    }
+    else if(obj.type() == json_obj_type_string)
+    {
+        obj.dump_string(document, val);
+    }
+    else
+    {
+        obj.dump_string(document, val);
+    }
+    
+    document.AddMember(v_key, val, document.GetAllocator());
+}
+
+void dispatch_event::loads(rapidjson::Document &document, string &input)
+{
+    document.Parse(input.c_str());
+
+    if ( document.HasParseError())
+    {
+        throw (int)-ERROR_TYPE_PARSE_ERROR;
+    }
+}
+
+void dispatch_event::dumps(rapidjson::Document &document, string &output)
+{
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    document.Accept(writer);
+    output = buffer.GetString();
+}
+
+
+void dispatch_event::put_err(rapidjson::Document &document, int err)
+{
+    string err_str = "ok";
+    string key = "status";
+    if ( err )
+        put_bool(document, key, false);
+    else
+        put_bool(document, key, true);
+    key = string("msg");
+    if ( err )
+        err_str = to_string(err);
+    put_string(document, key, err_str);
+}
+
+void dispatch_event::do_func(string &input, string &output)
+{
+    rapidjson::Document doc_in;
+    rapidjson::Document doc_out;
+
+    doc_out.SetObject();
+
+    try
+    {
+        loads(doc_in, input);
+        string action;
+        string key = "action";
+        get_string(doc_in, key, action);

@@ -1,0 +1,8 @@
+client_callback::client_callback(int thread_num, callback_handler *cb_handler) :
+        cb_handler(cb_handler),
+        server(thread_num),
+        lt_session_cli_set(server.get_io_service(), this),
+        lt_client_service(server.get_io_service(), SERVER_PORT)
+{
+}
+

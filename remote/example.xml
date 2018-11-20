@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<funcs>
+    <!--value_str:   C++type
+        string      string
+        char_p		char *
+        ulong       unsigned long
+        uint        unsigned int
+        bool        boo
+        data		unsigned long, unsigned char *
+        void_p		void *
+    -->
+    <!--type: in out in/out
+
+     -->
+
+    <port content="8088"/>
+
+    <client type="C++" namespace="client2cachenode" filename="client2cachenode"/>
+    <server type="C++" namespace="cachenode" filename="cachenode2client"/>
+    <!--<function_type type="C++" namespace="" filename="function_type"/>-->
+
+    <func name="sync_do" type="sync">
+        <param name="input" value="string" type="in"/>
+        <param name="output" value="ulong" type="out"/>
+    </func>
+
+    <func name="async_do" type="async">
+        <param name="input" value="ulong" type="in"/>
+        <param name="output" value="data" type="in"/>
+        <!--<param_passthrough name="inter_pri" value="void_p"/>-->
+    </func>
+
+</funcs>

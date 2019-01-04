@@ -89,7 +89,7 @@ def callback_handler_output_params(func):
         str += ", "
     if len(str) == 0:
         return str
-    return str[:len(str) - 2]
+    return str[:len(str)-2]
 
 
 def show_callback_handler():
@@ -102,7 +102,7 @@ def show_callback_handler():
             out_str = callback_handler_output_params(func)
             if len(out_str) > 0:
                 str += out_str + ", "
-            str += "int error) = 0;\n"
+            str += "INOUT void *&internal_pri, int error_internal) = 0;\n"
             print str
     print "};\n"
 
@@ -117,7 +117,7 @@ def show_client_callback():
     print ONE_TEB + "client_callback(int thread_num, callback_handler *cb_handler);\n"
     print "private:"
     print ONE_TEB + "void handler_by_output(lt_data_t *received_data) override;\n"
-    print ONE_TEB + "void handler_by_input(lt_data_t *sent_data, int error) override;\n"
+    print ONE_TEB + "void handler_by_input(lt_data_t *sent_data, int error_internal) override;\n"
     print "};\n"
 
 
@@ -139,9 +139,8 @@ def client_func_params(func):
     for param in func["params"]:
         str += generate_func_param(param)
         str += ", "
-    if len(str) == 0:
-        return str
-    return str[:len(str) - 2]
+    str += "INOUT void *&internal_pri"
+    return str
 
 
 def show_client_func(func):
@@ -149,7 +148,7 @@ def show_client_func(func):
     str += client_func_params(func)
 
     if func["type"] == "sync":
-        str += ", int &error);\n"
+        str += ");\n"
     else:
         out_str = ""
         for param in func["pt_params"]:
@@ -184,7 +183,7 @@ def show_sync_generate_data_func(func):
     out_str = put_sync_gendata_params(func)
     if len(out_str) > 0:
         str += out_str + ", "
-    str += "lt_condition *_internal_sync_cond, lt_data_t *data);\n"
+    str += "lt_condition *_internal_sync_cond, INOUT void *&internal_pri, lt_data_t *data);\n"
     print str
 
 
@@ -205,8 +204,7 @@ def show_async_generate_data_func(func):
     out_str = put_async_gendata_params(func)
     if len(out_str) > 0:
         str += out_str + ", "
-   #FIXME: no passthrough no interval_pri
-   # str += "void *&inter_pri,"
+    str += "INOUT void *&internal_pri,"
     str += " lt_data_t *data);\n"
     print str
 
@@ -242,7 +240,7 @@ if __name__ == '__main__':
         exit(1)
     funcs, port, client, server = lx.load_xml(argv[1])
     namespace = client["namespace"]
-    filename = client["filename"]
+    filename = client["filename"]  + "_internal"
     show_def(namespace, filename)
     gf.show_all(port, funcs)
     show_include(namespace)

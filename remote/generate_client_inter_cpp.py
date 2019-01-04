@@ -89,9 +89,8 @@ def client_func_params(func):
     for param in func["params"]:
         str += generate_param(param)
         str += ", "
-    if len(str) == 0:
-        return str
-    return str[:len(str) - 2]
+    str += "INOUT void *&internal_pri"
+    return str
 
 
 def show_client_func_def(func):
@@ -99,7 +98,7 @@ def show_client_func_def(func):
     str += client_func_params(func)
 
     if func["type"] == "sync":
-        str += ", int &error)"
+        str += ")"
     else:
         out_str = ""
         for param in func["pt_params"]:
@@ -129,9 +128,7 @@ def put_sync_gendata_params_no_def(func):
         if param["param_type"] != "out":
             str += generate_gendata_param(param)
             str += ", "
-    if len(str) == 0:
-        return str
-    return str[:len(str) - 2]
+    return str
 
 
 def show_sync_to_buf(func):
@@ -144,18 +141,19 @@ def show_sync_to_buf(func):
 
 
 def show_sync_client_func(func):
+    print ONE_TEB + "int error_internal = 0;"
     print ONE_TEB + "lt_condition _internal_sync_cond;"
-    print ONE_TEB + "cb->snd(sess, boost::bind(&client::" + func["func_name"] + "_gendata, this, " + put_sync_gendata_params_no_def(func) + ", &_internal_sync_cond, _1));"
-    print ONE_TEB + "int err = _internal_sync_cond.wait();"
-    print ONE_TEB + "if ( err < 0 )"
+    print ONE_TEB + "cb->snd(sess, boost::bind(&client::" + func["func_name"] + "_gendata, this, " + put_sync_gendata_params_no_def(func) + " &_internal_sync_cond, internal_pri, _1));"
+    print ONE_TEB + "int err_internal = _internal_sync_cond.wait();"
+    print ONE_TEB + "if ( err_internal < 0 )"
     print ONE_TEB + "{"
-    print ONE_TEB + "    return err;"
+    print ONE_TEB + "    return err_internal;"
     print ONE_TEB + "}"
     print ONE_TEB + "const lt_data_t &res_data = _internal_sync_cond.get_data();"
     print ONE_TEB + "unsigned char *buf = res_data.get_buf();"
     show_sync_to_buf(func)
-    print ONE_TEB + "error = lt_data_translator::to_uint(buf);"
-    print ONE_TEB + "return err;"
+    print ONE_TEB + "error_internal = lt_data_translator::to_uint(buf);"
+    print ONE_TEB + "return err_internal | error_internal;"
 
 
 def put_async_gendata_params_no_def(func):
@@ -167,15 +165,13 @@ def put_async_gendata_params_no_def(func):
     for param in func["pt_params"]:
         str += generate_gendata_param(param)
         str += ", "
-    if len(str) == 0:
-        return str
-    return str[:len(str) - 2]
+    return str
 
 
 def show_async_client_func(func):
     print ONE_TEB + "if ( !sess )"
     print TWO_TEB + "return -RPC_ERROR_TYPE_CONNECT_FAIL;"
-    print ONE_TEB + "return cb->snd(sess, boost::bind(&client::" + func["func_name"] + "_gendata, this, " + put_async_gendata_params_no_def(func) + ", _1));"
+    print ONE_TEB + "return cb->snd(sess, boost::bind(&client::" + func["func_name"] + "_gendata, this, " + put_async_gendata_params_no_def(func) + " internal_pri, _1));"
 
 
 def show_client_funcs():
@@ -206,7 +202,7 @@ def show_sync_generate_data_func_def(func):
     out_str = put_sync_gendata_params(func)
     if len(out_str) > 0:
         str += out_str + ", "
-    str += "lt_condition *_internal_sync_cond, lt_data_t *data)"
+    str += "lt_condition *_internal_sync_cond,INOUT void *&internal_pri, lt_data_t *data)"
     print str
 
 
@@ -226,7 +222,7 @@ def get_gendate_data_len(func):
                 str += gen_data_param_tab[param["param_value"]]
                 str += ")"
                 str += " + "
-    str += "sizeof(void *);"
+    str += "sizeof(void *) + sizeof(void *);"
     return str
 
 
@@ -241,13 +237,13 @@ def show_by_buf(func):
                 else:
                     print ONE_TEB + "lt_data_translator::by_" + param["param_value"] + "(" + param["param_name"] + ", buf);"
         print ONE_TEB + "lt_data_translator::by_void_p(_internal_sync_cond, buf);"
+        print ONE_TEB + "lt_data_translator::by_void_p(internal_pri, buf);"
         print ONE_TEB + "return 0;"
     else:
         for param in func["params"]:
             if param["param_type"] != "out":
                 print ONE_TEB + "lt_data_translator::by_" + param["param_value"] + "(" + param["param_name"] + ", buf);"
-	# FIXME: now no interpri not passthrough
-       # print ONE_TEB + "lt_data_translator::by_void_p(inter_pri, buf);"
+        print ONE_TEB + "lt_data_translator::by_void_p(internal_pri, buf);"
         print ONE_TEB + "return 0;"
 
 
@@ -286,8 +282,7 @@ def show_async_generate_data_func_def(func):
     out_str = put_async_gendata_params(func)
     if len(out_str) > 0:
         str += out_str + ", "
-    #FIXME : now no inter_pri
-    #str += "void *&inter_pri," 
+    str += "INOUT void *&internal_pri,"
     str += "lt_data_t *data)"
     print str
 
@@ -315,7 +310,7 @@ def get_async_gendate_data_len(func):
                 str += gen_data_param_tab[param["param_value"]]
                 str += ")"
                 str += " + "
-    str += "sizeof(void *);"
+    str += "sizeof(void *) + sizeof(void *);"
     return str
 
 
@@ -348,12 +343,14 @@ def show_to_buf(func):
         if param["param_type"] != "in":
             print THREE_TEB + param_declare_tab[param["param_value"]] + BLANK + param["param_name"] + " = lt_data_translator::to_" + param["param_value"] + "(buf);"
     if func["type"] == "sync":
-        print THREE_TEB + "unsigned int error = lt_data_translator::to_uint(buf);"
+        print THREE_TEB + "unsigned int error_internal = lt_data_translator::to_uint(buf);"
         print THREE_TEB + "void *internal_sync_cond_p = lt_data_translator::to_void_p(buf);"
+        print THREE_TEB + "void * internal_pri = lt_data_translator::to_void_p(buf);"
     else:
         for param in func["pt_params"]:
             print THREE_TEB + param_declare_tab[param["param_value"]] + BLANK + param["param_name"] + " = lt_data_translator::to_" + param["param_value"] + "(buf);"
-        print THREE_TEB + "unsigned int error = lt_data_translator::to_uint(buf);"
+        print THREE_TEB + "unsigned int error_internal = lt_data_translator::to_uint(buf);"
+        print THREE_TEB + "void * internal_pri = lt_data_translator::to_void_p(buf);"
 
 
 def gen_sync_res_data_len(func):
@@ -377,12 +374,12 @@ def show_by_output_gen_res_buf(func):
 
 
 def show_sync_notify(func):
-    print THREE_TEB + "lt_data_t res_data(" + gen_sync_res_data_len(func) + "sizeof(error));"
+    print THREE_TEB + "lt_data_t res_data(" + gen_sync_res_data_len(func) + "sizeof(error_internal));"
     print THREE_TEB + "unsigned char *res_buf = res_data.get_buf();"
     show_by_output_gen_res_buf(func)
-    print THREE_TEB + "lt_data_translator::by_uint(error, res_buf);"
+    print THREE_TEB + "lt_data_translator::by_uint(error_internal, res_buf);"
     print THREE_TEB + "lt_condition *_internal_sync_cond = (lt_condition *) internal_sync_cond_p;"
-    print THREE_TEB + "_internal_sync_cond->notify(res_data, error);"
+    print THREE_TEB + "_internal_sync_cond->notify(res_data, error_internal);"
 
 
 def generate_call_param(param):
@@ -409,7 +406,7 @@ def get_async_callback_params(func):
 
 
 def show_async_callback(func):
-    print THREE_TEB + "cb_handler->" + func["func_name"] + "_callback(" + get_async_callback_params(func) + "error);"
+    print THREE_TEB + "cb_handler->" + func["func_name"] + "_callback(" + get_async_callback_params(func) + "internal_pri, error_internal);"
 
 
 def show_by_output_cases():
@@ -448,7 +445,7 @@ def show_skip_buf(func):
         for param in func["params"]:
             if param["param_type"] != "out":
                 print THREE_TEB + "lt_data_translator::skip_" + param["param_value"] + "(buf);"
-
+    print THREE_TEB + "lt_data_translator::skip_void_p(buf);"
 
 def show_by_input_cases():
     for func in funcs:
@@ -459,20 +456,22 @@ def show_by_input_cases():
             print THREE_TEB + "void *internal_sync_cond_p = lt_data_translator::to_void_p(buf);"
             print THREE_TEB + "lt_data_t res_data;"
             print THREE_TEB + "lt_condition *_internal_sync_cond = (lt_condition *) internal_sync_cond_p;"
-            print THREE_TEB + "_internal_sync_cond->notify(res_data, error);"
+            print THREE_TEB + "void * internal_pri;"
+            print THREE_TEB + "_internal_sync_cond->notify(res_data, error_internal);"
         else:
             for param in func["pt_params"]:
                 print THREE_TEB + param_declare_tab[param["param_value"]] + BLANK + param["param_name"] + " = lt_data_translator::to_" + param["param_value"] + "(buf);"
             for param in func["params"]:
                 if param["param_type"] != "in":
                     print THREE_TEB + param_declare_tab[param["param_value"]] + BLANK + param["param_name"] + ";"
+            print THREE_TEB + "void * internal_pri;"
             show_async_callback(func)
         print TWO_TEB + "}"
         print THREE_TEB + "break;"
 
 
 def show_by_input():
-    print "void client_callback::handler_by_input(lt_data_t *sent_data, int error)"
+    print "void client_callback::handler_by_input(lt_data_t *sent_data, int error_internal)"
     print "{"
     print ONE_TEB + "unsigned char *buf = sent_data->get_buf();"
     print ONE_TEB + "unsigned int func_type = lt_data_translator::to_uint(buf);"
@@ -501,7 +500,7 @@ if __name__ == '__main__':
         exit(1)
     funcs, port, client, server = lx.load_xml(argv[1])
     namespace = client["namespace"]
-    filename = client["filename"]
+    filename = client["filename"] + "_internal"
     show_include(namespace, filename)
     show_port(port)
     show_client_common()

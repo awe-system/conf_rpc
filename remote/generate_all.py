@@ -4,11 +4,11 @@ from sys import argv
 
 
 def gen_client(xml):
-    filename = client["filename"]
-    cmd = "python ./generate_client_h.py " + xml + " > ./output/" + filename + ".h"
+    filename = client["filename"] + "_internal"
+    cmd = "python ./generate_client_inter_h.py " + xml + " > ./output/" + filename + ".h"
     print cmd
     os.system(cmd)
-    cmd = "python ./generate_client_cpp.py " + xml + " > ./output/" + filename + ".cpp"
+    cmd = "python ./generate_client_inter_cpp.py " + xml + " > ./output/" + filename + ".cpp"
     print cmd
     os.system(cmd)
 

@@ -140,7 +140,7 @@ def show_handler_done_func(func):
     out_str = handler_done_output_params(func)
     if len(out_str) > 0:
         str += out_str + ", "
-    str += "void *server_context, int error) = 0;\n"
+    str += "void *server_context, int error_internal) = 0;\n"
     print str
 
 
@@ -177,7 +177,7 @@ def show_sync_generate_data_func(func):
     out_str = put_sync_gendata_params(func)
     if len(out_str) > 0:
         str += out_str + ", "
-    str += "int error, void *internal_sync_cond_p, lt_data_t *data);\n"
+    str += "int error_internal, void *internal_sync_cond_p, void *internal_pri, lt_data_t *data);\n"
     print str
 
 
@@ -211,7 +211,7 @@ def show_async_generate_data_func(func):
     out_str = put_async_gendata_params(func)
     if len(out_str) > 0:
         str += out_str + ", "
-    str += "void *server_context, int error, lt_data_t *data);\n"
+    str += "void *server_context, int error_internal, lt_data_t *data);\n"
     print str
 
 
@@ -252,7 +252,7 @@ def show_async_done_func(func):
     out_str = async_done_fun_params(func)
     if len(out_str) > 0:
         str += out_str + ", "
-    str += "void *server_context, int error);\n"
+    str += "void *server_context, int error_internal);\n"
     print str
 
 

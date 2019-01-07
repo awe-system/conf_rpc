@@ -51,5 +51,5 @@ if __name__ == '__main__':
     if len(argv) < 2:
         help(argv)
         exit(1)
-    funcs, port, client, server, function_type = lx.load_xml(argv[1])
+    funcs, port, client, server, project = lx.load_xml(argv[1])
     show_all(port, funcs)

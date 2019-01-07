@@ -27,6 +27,10 @@ def load_port(child):
     port_content = child.getAttribute("content")
     return port_content
 
+def load_project(child):
+    project_content = child.getAttribute("content")
+    return project_content
+
 
 def load_client(child):
     client_type = child.getAttribute("type")
@@ -63,6 +67,7 @@ def load_xml(filen):
     port = ""
     client = {}
     server = {}
+    project = ""
     d = dom.parse(filen)
     root = d.documentElement
     if root.tagName != "funcs": return er.xmlbadformate
@@ -71,8 +76,10 @@ def load_xml(filen):
             funcs = load_func(funcs, child)
         if root.ELEMENT_NODE == child.nodeType and child.tagName == "port":
             port = load_port(child)
+        if root.ELEMENT_NODE == child.nodeType and child.tagName == "project":
+            project = load_project(child)
         if root.ELEMENT_NODE == child.nodeType and child.tagName == "client":
             client = load_client(child)
         if root.ELEMENT_NODE == child.nodeType and child.tagName == "server":
             server = load_server(child)
-    return funcs, port, client, server
+    return funcs, port, client, server, project

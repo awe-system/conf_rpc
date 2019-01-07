@@ -426,7 +426,7 @@ if __name__ == '__main__':
     if len(argv) < 2:
         help(argv)
         exit(1)
-    funcs, port, client, server = lx.load_xml(argv[1])
+    funcs, port, client, server,project = lx.load_xml(argv[1])
     namespace = server["namespace"]
     filename = server["filename"]
     show_include(namespace, filename)

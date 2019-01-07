@@ -23,7 +23,6 @@ param_tab = {
     "void_p": "void *&",
 }
 
-
 gen_data_param_tab = {
     "string": "std::string",
     "char_p": "char *",
@@ -89,7 +88,7 @@ def callback_handler_output_params(func):
         str += ", "
     if len(str) == 0:
         return str
-    return str[:len(str)-2]
+    return str[:len(str) - 2]
 
 
 def show_callback_handler():
@@ -137,7 +136,7 @@ def show_client_head():
 def client_func_params(func):
     str = ""
     for param in func["params"]:
-        if(func["type"] == "sync" or
+        if (func["type"] == "sync" or
                 param["param_type"] == "in" or
                 param["param_type"] == "inout"):
             str += generate_func_param(param)
@@ -159,7 +158,7 @@ def show_client_func(func):
             out_str += param["param_name"]
             out_str += ", "
         if len(out_str) > 0:
-            str += ", " + out_str[:len(out_str) -2]
+            str += ", " + out_str[:len(out_str) - 2]
         str += ");\n"
     print str
 
@@ -241,9 +240,9 @@ if __name__ == '__main__':
     if len(argv) < 2:
         help(argv)
         exit(1)
-    funcs, port, client, server = lx.load_xml(argv[1])
+    funcs, port, client, server, project = lx.load_xml(argv[1])
     namespace = client["namespace"]
-    filename = client["filename"]  + "_internal"
+    filename = client["filename"] + "_internal"
     show_def(namespace, filename)
     gf.show_all(port, funcs)
     show_include(namespace)

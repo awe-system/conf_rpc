@@ -15,8 +15,8 @@ def gen_client(xml):
     cmd = "python ./generate_client_h.py " + xml + " > ./output/" + filename + ".h"
     print cmd
     os.system(cmd)
-    # cmd = "python ./generate_client_cpp.py " + xml + " > ./output/" + filename + ".cpp"
-    # print cmd
+    cmd = "python ./generate_client_cpp.py " + xml + " > ./output/" + filename + ".cpp"
+    print cmd
     os.system(cmd)
 
 
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     if len(argv) < 2:
         print "need xml"
         exit(1)
-    funcs, port, client, server = lx.load_xml(argv[1])
+    funcs, port, client, server, project = lx.load_xml(argv[1])
     os.system("mkdir output")
     gen_client(argv[1])
     gen_server(argv[1])

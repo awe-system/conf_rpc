@@ -2,7 +2,9 @@ import xml.dom.minidom as dom
 
 
 def load_func(funcs, func):
-    newfunc = {"func_name": func.getAttribute("name"), "type": func.getAttribute("type")}
+    newfunc = {"func_name": func.getAttribute("name"),
+               "type": func.getAttribute("type"),
+               "subtype":func.getAttribute("subtype")}
     params = []
     for param in func.getElementsByTagName("param"):
         param_item = {"param_name": param.getAttribute("name"),

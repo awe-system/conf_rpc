@@ -137,8 +137,11 @@ def show_client_head():
 def client_func_params(func):
     str = ""
     for param in func["params"]:
-        str += generate_func_param(param)
-        str += ", "
+        if(func["type"] == "sync" or
+                param["param_type"] == "in" or
+                param["param_type"] == "inout"):
+            str += generate_func_param(param)
+            str += ", "
     str += "INOUT void *&internal_pri"
     return str
 

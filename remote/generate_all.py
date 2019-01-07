@@ -11,6 +11,13 @@ def gen_client(xml):
     cmd = "python ./generate_client_inter_cpp.py " + xml + " > ./output/" + filename + ".cpp"
     print cmd
     os.system(cmd)
+    filename = client["filename"]
+    cmd = "python ./generate_client_h.py " + xml + " > ./output/" + filename + ".h"
+    print cmd
+    os.system(cmd)
+    # cmd = "python ./generate_client_cpp.py " + xml + " > ./output/" + filename + ".cpp"
+    # print cmd
+    os.system(cmd)
 
 
 def gen_server(xml):

@@ -87,8 +87,11 @@ def generate_param(param):
 def client_func_params(func):
     str = ""
     for param in func["params"]:
-        str += generate_param(param)
-        str += ", "
+        if(func["type"] == "sync" or
+                param["param_type"] == "in" or
+                param["param_type"] == "inout"):
+            str += generate_param(param)
+            str += ", "
     str += "INOUT void *&internal_pri"
     return str
 

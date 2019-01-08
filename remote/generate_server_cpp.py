@@ -53,10 +53,17 @@ def show_port(port):
 
 
 def show_async_class_context(func):
-    print "class " + func["func_name"] + "_context"
+    print "class " + func["func_name"] + "_context : public lt_session_description"
     print "{"
     print "public:"
-    print ONE_TEB + "void *server_pri;"
+    print ONE_TEB +"void set_session_private(void *pri) override"
+    print ONE_TEB + "{"
+    print TWO_TEB + "sess->set_session_private(pri);"
+    print ONE_TEB + "}\n"
+    print ONE_TEB + "void *get_session_private() const override"
+    print ONE_TEB + "{"
+    print TWO_TEB + "return sess->get_session_private();"
+    print ONE_TEB + "}\n"
     print ONE_TEB + "void *cli_pri;"
     print ONE_TEB + "lt_data_t *request_data;"
     print ONE_TEB + "lt_session_serv *sess;"
@@ -139,7 +146,7 @@ def gen_handler_params(func):
         out_str = server_handler_sync_params(func)
 
     else:
-        out_str = server_handler_async_params(func) + ", (void *) context"
+        out_str = server_handler_async_params(func) + ", (lt_session_description  *) context"
     return out_str
 
 
@@ -335,7 +342,7 @@ def show_async_generate_data_func(func):
     out_str = put_async_gendata_params(func)
     if len(out_str) > 0:
         str += out_str + ", "
-    str += "void *server_context, int error_internal, lt_data_t *data)"
+    str += "lt_session_description *server_context, int error_internal, lt_data_t *data)"
     print str
     print "{"
     print ONE_TEB + func["func_name"] + "_context *context = (" + func["func_name"] + "_context *)" + "server_context;"
@@ -402,7 +409,7 @@ def show_done():
             out_str = async_done_fun_params(func)
             if len(out_str) > 0:
                 str += out_str + ", "
-            str += "void *server_context, int error_internal)\n"
+            str += "lt_session_description *server_context, int error_internal)\n"
             str += "{\n"
             str += ONE_TEB + func["func_name"] + "_context *context = (" + func["func_name"] + "_context *) server_context;\n"
             str += ONE_TEB + "lt_session_serv *sess = context->sess;\n"

@@ -86,7 +86,7 @@ def show_handler(namespace, funcs):
 
 def show_static(namespace):
     print "static " + namespace + "_thread_handler handler;"
-    print "static client_callback cb(" + namespace + "_threadnum.get_int(), &handler);"
+    print "static client_callback cb(max(" + namespace + "_threadnum.get_int(),1), &handler);"
 
 
 def show_fix(namespace):

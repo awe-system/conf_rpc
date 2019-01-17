@@ -14,7 +14,7 @@ def help(arg):
 
 def show_include(namespace):
     str = "#include <lt_data_translator.h>\n"
-    str += "#include \"client2cachenode.h\"\n"
+    str += "#include \"" + namespace + ".h\"\n"
     str += "#include \"awe_conf/env.h\"\n"
     print str
 

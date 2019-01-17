@@ -19,7 +19,7 @@ def show_def(namespace, filename):
 
 
 def show_include(namespace):
-    str = "#include \"client2cachenode_internal.h\"\n"
+    str = "#include \"" + namespace + "_internal.h\"\n"
     print str
 
 
@@ -39,17 +39,17 @@ def show_main_head(namespace):
 
 
 def show_sync_func(func):
-    str = ONE_TEB + gfs.client_sync_head(func) + ";"
+    str = ONE_TEB + gfs.client_sync_head(func) + ";\n"
     print str
 
 
 def show_async_func(func):
-    str = ONE_TEB + gfs.client_async_head(func) + ";"
+    str = ONE_TEB + gfs.client_async_head(func) + ";\n"
     print str
 
 
 def show_async_callback(func):
-    str = ONE_TEB + "virtual " + gfs.client_cb_head(func) + " = 0;"
+    str = ONE_TEB + "virtual " + gfs.client_cb_head(func) + " = 0;\n"
     print str
 
 

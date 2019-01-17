@@ -301,7 +301,7 @@ def show_async_generate_data_func_def(func):
 
 def show_request_data(func):
     for param in func["params"]:
-        if param["param_value"] == "data":
+        if param["param_value"] == "data" and param["param_type"] != "out":
             p_name = param["param_name"]
             print ONE_TEB + "lt_data_t " + p_name + "(" + p_name + "_len, " + p_name + "_buf);"
 

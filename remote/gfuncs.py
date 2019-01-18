@@ -218,3 +218,17 @@ def client_inter_cb_head(func):
     str += generate_async_cb_param_doma_end(func["params"])
     str += "INOUT void *&internal_pri, OUT int error_internal)"
     return str
+
+def out_param_num(func):
+    i = 0
+    for param in func["params"]:
+        if param["param_type"] != "in":
+            i = i+1
+    return i
+
+def in_param_num(func):
+    i = 0
+    for param in func["params"]:
+        if param["param_type"] != "out":
+            i = i+1
+    return i

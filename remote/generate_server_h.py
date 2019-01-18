@@ -104,8 +104,10 @@ def show_handler_func(func):
 
     if func["type"] == "sync":
         str += ") = 0;\n"
-    else:
+    elif len(out_str) > 0:
         str += ", lt_session_description *server_context) = 0;\n"
+    else:
+        str += "lt_session_description *server_context) = 0;\n"
     print str
 
 

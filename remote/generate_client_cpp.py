@@ -43,10 +43,8 @@ def show_callback_head(func):
     print "\n" + ONE_TEB + gfs.client_inter_cb_head(func) + " override"
     print ONE_TEB + "{"
 
-
 def show_callback_end():
     print ONE_TEB + "}"
-
 
 def show_async_callback(func):
     print TWO_TEB + namespace + " *node = (" + namespace + " *)internal_pri;"
@@ -55,13 +53,16 @@ def show_async_callback(func):
 
 
 def show_sync_callback(func):
-    print TWO_TEB + "lt_data_t res_data(" + gfs.client_sync_subasync_out_totalsize(
+    if(gfs.in_param_num(func) > 0 ):
+        print TWO_TEB + "lt_data_t res_data(" + gfs.client_sync_subasync_out_totalsize(
         func) + ");"
-    print TWO_TEB + "unsigned char *res_buf = res_data.get_buf();"
+        print TWO_TEB + "unsigned char *res_buf = res_data.get_buf();"
     print gfs.gen_cb_tanslate_params2buf(func, TWO_TEB, "res_buf")
     print TWO_TEB + "lt_condition *_internal_sync_cond = (lt_condition *) internal_pri;"
-    print TWO_TEB + "_internal_sync_cond->notify(res_data, error_internal);"
-
+    if(gfs.in_param_num(func) > 0 ):
+        print TWO_TEB + "_internal_sync_cond->notify(res_data, error_internal);"
+    else:
+        print TWO_TEB + "_internal_sync_cond->notify();"
 
 def show_callback(func):
     show_callback_head(func)
@@ -125,8 +126,11 @@ def show_wait_func(func):
     print ONE_TEB + "if(err_internal) return err_internal;\n"
     print ONE_TEB + "int error_internal = _internal_sync_cond.wait();"
     print ONE_TEB + "if(error_internal) return error_internal;\n"
-    print ONE_TEB + "const lt_data_t &res_data = _internal_sync_cond.get_data();"
-    print ONE_TEB + "unsigned char *buf = res_data.get_buf();\n"
+
+    if gfs.out_param_num(func) > 0:
+        print ONE_TEB + "const lt_data_t &res_data = _internal_sync_cond.get_data();"
+        print ONE_TEB + "unsigned char *buf = res_data.get_buf();\n"
+
     print gfs.gen_cb_tanslate_buf2params(func, ONE_TEB, "buf")
     print ONE_TEB + "return error_internal;\n"
 

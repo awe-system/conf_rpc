@@ -144,9 +144,12 @@ def gen_handler_params(func):
     out_str = ""
     if func["type"] == "sync":
         out_str = server_handler_sync_params(func)
-
     else:
-        out_str = server_handler_async_params(func) + ", (lt_session_description  *) context"
+        out_str = server_handler_async_params(func)
+        if len(out_str) > 0:
+            out_str += ", (lt_session_description  *) context"
+        else:
+            out_str += "(lt_session_description  *) context"
     return out_str
 
 

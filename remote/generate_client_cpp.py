@@ -47,7 +47,7 @@ def show_callback_end():
     print ONE_TEB + "}"
 
 def show_async_callback(func):
-    print TWO_TEB + namespace + " *node = (" + namespace + " *)internal_pri;"
+    print TWO_TEB + classname + " *node = (" + classname + " *)internal_pri;"
     print TWO_TEB + "node->" + func[
         "func_name"] + "_callback(" + gfs.client_async_cb_values(func) + ");"
 

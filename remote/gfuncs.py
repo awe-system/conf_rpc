@@ -86,6 +86,10 @@ def tanslate_params2buf(param, TAB_STR, BUF_STR):
         str += TAB_STR + tranlate2buf_tab[param["param_value"]] + "("
         str += param["param_name"]
         str += ", " + BUF_STR + ");\n"
+    else:
+        str += TAB_STR + tranlate2buf_tab[param["param_value"]] + "("
+        str += param["param_name"]
+        str += ", " + BUF_STR + ");\n"
     return str
 
 

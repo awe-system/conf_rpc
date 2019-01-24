@@ -93,6 +93,6 @@ if __name__ == '__main__':
     classname = client["classname"]
     filename = client["filename"]
     show_def(namespace, filename)
-    show_include(namespace)
+    show_include(filename)
     show_main_class(namespace, classname,funcs)
     show_end()

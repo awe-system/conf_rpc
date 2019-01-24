@@ -113,6 +113,10 @@ def generate_func_size(param):
     if param["param_value"] == "data":
         str += "sizeof(" + param["param_name"] + "_len)"
         str += " + " + param["param_name"] + "_len"
+    elif param["param_value"] == "string":
+        str += param["param_name"] + ".length() + 1 "
+    elif param["param_value"] == "char_p":
+        str += "strlen(" + param["param_name"] + ") + 1 "
     else:
         str += "sizeof(" + param["param_name"] + ")"
     return str

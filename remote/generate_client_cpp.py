@@ -72,12 +72,10 @@ def show_callback(func):
         show_async_callback(func)
     show_callback_end()
 
-
 def show_callbacks(funcs):
     for func in funcs:
         if (func["type"] == "async"):
             show_callback(func)
-
 
 def show_handler(classname, funcs):
     show_handler_head(classname)

@@ -27,13 +27,13 @@ def show_end():
     print "#endif"
 
 
-def show_main_head(namespace):
+def show_main_head(namespace, classname):
     print "namespace " + namespace + "\n{\n"
-    print "class " + namespace + "\n{\n"
+    print "class " + classname + "\n{\n"
     print "private:"
     print ONE_TEB + "client cli;\n"
     print "public:"
-    print ONE_TEB + namespace + "();"
+    print ONE_TEB + classname + "();"
     print ONE_TEB + "int connect(const std::string &ip);"
     print ONE_TEB + "void disconnect();\n"
 
@@ -77,8 +77,8 @@ def show_main_end(funcs):
     print "}"
 
 
-def show_main_class(namespace, funcs):
-    show_main_head(namespace)
+def show_main_class(namespace,classname, funcs):
+    show_main_head(namespace,classname)
     show_callbacks(funcs)
     show_funcs(funcs)
     show_main_end(funcs)
@@ -90,8 +90,9 @@ if __name__ == '__main__':
         exit(1)
     funcs, port, client, server, project = lx.load_xml(argv[1])
     namespace = client["namespace"]
+    classname = client["classname"]
     filename = client["filename"]
     show_def(namespace, filename)
     show_include(namespace)
-    show_main_class(namespace, funcs)
+    show_main_class(namespace, classname,funcs)
     show_end()

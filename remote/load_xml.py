@@ -39,6 +39,10 @@ def load_client(child):
     if client_type == "C++":
         namespace = child.getAttribute("namespace")
         res.update({"namespace": namespace})
+        classname = child.getAttribute("classname")
+        if(classname == ""):
+            classname = namespace
+        res.update({"classname": classname})
     return res
 
 

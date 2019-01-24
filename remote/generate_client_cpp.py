@@ -12,25 +12,25 @@ def help(arg):
     print "need xml path"
 
 
-def show_include(namespace):
+def show_include(namespace,filename):
     str = "#include <lt_data_translator.h>\n"
-    str += "#include \"" + namespace + ".h\"\n"
+    str += "#include \"" + filename + ".h\"\n"
     str += "#include \"awe_conf/env.h\"\n"
     print str
 
 
-def show_head(namespace, project):
+def show_head(namespace, classname, project):
     print "namespace " + namespace + "\n{"
-    print "env " + namespace + "_threadnum(\"" + project + "\", \"" \
-          + namespace + "_threadnum\");"
+    print "env " + classname + "_threadnum(\"" + project + "\", \"" \
+          + classname + "_threadnum\");"
 
 
 def show_end():
     print "};\n"
 
 
-def show_handler_head(namespace):
-    print "class " + namespace + "_thread_handler : public callback_handler"
+def show_handler_head(classname):
+    print "class " + classname + "_thread_handler : public callback_handler"
     print "{"
     print "public:"
 
@@ -79,27 +79,27 @@ def show_callbacks(funcs):
             show_callback(func)
 
 
-def show_handler(namespace, funcs):
-    show_handler_head(namespace)
+def show_handler(classname, funcs):
+    show_handler_head(classname)
     show_callbacks(funcs)
     show_handler_end()
 
 
-def show_static(namespace):
-    print "static " + namespace + "_thread_handler handler;"
-    print "static client_callback cb(max(" + namespace + "_threadnum.get_int(),1), &handler);"
+def show_static(classname):
+    print "static " + classname + "_thread_handler handler;"
+    print "static client_callback cb(max(" + classname + "_threadnum.get_int(),1), &handler);"
 
 
-def show_fix(namespace):
-    print namespace + "::" + namespace + "() : cli(&cb){}\n"
-    print "int " + namespace + "::connect(const std::string &ip)"
+def show_fix(classname):
+    print classname + "::" + classname + "() : cli(&cb){}\n"
+    print "int " + classname + "::connect(const std::string &ip)"
     print "{\n" + ONE_TEB + "return cli.connect(ip);\n" + "}\n"
-    print "void " + namespace + "::disconnect()"
+    print "void " + classname + "::disconnect()"
     print "{\n" + ONE_TEB + "cli.disconnect();\n" + "}\n"
 
 
-def show_func_head(namespace, func):
-    str = "int " + namespace + "::" + func["func_name"] + "("
+def show_func_head(classname, func):
+    str = "int " + classname + "::" + func["func_name"] + "("
     if (func["type"] == "sync" or func["subtype"] == "sync"):
         str += gfs.generate_all_param(func["params"])
     else:
@@ -142,9 +142,9 @@ def show_func_body(func):
         show_direct_func(func)
 
 
-def show_dynamic(namespace, funcs):
+def show_dynamic(classname, funcs):
     for func in funcs:
-        show_func_head(namespace, func)
+        show_func_head(classname, func)
         show_func_body(func)
         show_func_end()
 
@@ -155,11 +155,12 @@ if __name__ == '__main__':
         exit(1)
     funcs, port, client, server, project = lx.load_xml(argv[1])
     namespace = client["namespace"]
+    classname = client["classname"]
     filename = client["filename"]
-    show_include(namespace)
-    show_head(namespace, project)
-    show_handler(namespace, funcs)
-    show_static(namespace)
-    show_fix(namespace)
-    show_dynamic(namespace, funcs)
+    show_include(namespace,filename)
+    show_head(namespace, classname, project)
+    show_handler(classname, funcs)
+    show_static(classname)
+    show_fix(classname)
+    show_dynamic(classname, funcs)
     show_end()

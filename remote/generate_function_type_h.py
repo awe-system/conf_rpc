@@ -18,20 +18,20 @@ def show_head(port):
     print "#define _FUNCTION_TYPE_"+port+"_H\n"
 
 
-def show_client_func_type(funcs):
+def show_client_func_type(funcs, port):
     print "enum client_function_callback_type"
     print "{"
     for f in funcs:
-        print ONE_TEB + "client_function_callback_type_" + f["func_name"] + ","
+        print ONE_TEB + "client_function_callback_type_" + port+ "_"  + f["func_name"] + ","
 
     print "};"
 
 
-def show_server_func_type(funcs):
+def show_server_func_type(funcs, port):
     print "enum server_function_callback_type"
     print "{"
     for f in funcs:
-        print ONE_TEB + "server_function_callback_type_" + f["func_name"] + ","
+        print ONE_TEB + "server_function_callback_type_" + port+ "_" + f["func_name"] + ","
 
     print "};"
 
@@ -42,8 +42,8 @@ def show_end():
 
 def show_all(port,funcs):
     show_head(port)
-    show_client_func_type(funcs)
-    show_server_func_type(funcs)
+    show_client_func_type(funcs,port)
+    show_server_func_type(funcs,port)
     show_end()
 
 

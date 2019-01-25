@@ -180,7 +180,8 @@ def show_sync_snd(func):
 
 def show_switch():
     for func in funcs:
-        print TWO_TEB + "case server_function_callback_type_" + func["func_name"] + ":"
+        print TWO_TEB + "case server_function_callback_type_" + port+ "_" +\
+              func["func_name"] + ":"
         print TWO_TEB + "{"
         show_to_buf(func)
         show_do_handler(func)
@@ -273,7 +274,7 @@ def show_by_buf(func):
         print ONE_TEB + "return 0;"
 
 
-def show_sync_generate_data_func(func):
+def show_sync_generate_data_func(func, port):
     str = "int server::"
     str += func["func_name"] + "_gendata" + "("
     out_str = put_sync_gendata_params(func)
@@ -282,7 +283,7 @@ def show_sync_generate_data_func(func):
     str += "int error_internal, void *internal_sync_cond_p, void *internal_pri,lt_data_t *data)"
     print str
     print "{"
-    print ONE_TEB + "unsigned int func_type = client_function_callback_type_" + func["func_name"] + ";"
+    print ONE_TEB + "unsigned int func_type = client_function_callback_type_" + port+ "_" + func["func_name"] + ";"
     print ONE_TEB + get_gendate_data_len(func)
     print ONE_TEB + "data->realloc_buf();"
     print ONE_TEB + "unsigned char *res_buf = data->get_buf();"
@@ -339,7 +340,7 @@ def get_async_gendate_data_len(func):
     return str
 
 
-def show_async_generate_data_func(func):
+def show_async_generate_data_func(func, port):
     str = "int server::"
     str += func["func_name"] + "_done_gendata" + "("
     out_str = put_async_gendata_params(func)
@@ -349,7 +350,7 @@ def show_async_generate_data_func(func):
     print str
     print "{"
     print ONE_TEB + func["func_name"] + "_context *context = (" + func["func_name"] + "_context *)" + "server_context;"
-    print ONE_TEB + "unsigned int func_type = client_function_callback_type_" + func["func_name"] + ";"
+    print ONE_TEB + "unsigned int func_type = client_function_callback_type_"+ port+ "_"  + func["func_name"] + ";"
     show_response_data(func)
     print ONE_TEB + get_async_gendate_data_len(func)
     print ONE_TEB + "data->realloc_buf();"
@@ -361,9 +362,9 @@ def show_async_generate_data_func(func):
 def show_generate_data_funcs():
     for func in funcs:
         if func["type"] == "sync":
-            show_sync_generate_data_func(func)
+            show_sync_generate_data_func(func, port)
         else:
-            show_async_generate_data_func(func)
+            show_async_generate_data_func(func, port)
 
 
 def async_done_fun_params(func):

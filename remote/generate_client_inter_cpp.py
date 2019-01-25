@@ -262,8 +262,8 @@ def show_by_buf(func):
 def show_sync_generate_data_func(func):
     show_sync_generate_data_func_def(func)
     print "{"
-    print ONE_TEB + "unsigned int func_type = server_function_callback_type_" + \
-          func["func_name"] + ";"
+    print ONE_TEB + "unsigned int func_type = server_function_callback_type_"+ \
+          port+ "_"  + func["func_name"] + ";"
 
     for param in func["params"]:
         if param["param_value"] == "data":
@@ -330,7 +330,7 @@ def show_async_generate_data_func(func):
     show_async_generate_data_func_def(func)
     print "{"
     print ONE_TEB + "unsigned int func_type = server_function_callback_type_" + \
-          func["func_name"] + ";"
+          port+ "_" + func["func_name"] + ";"
     show_request_data(func)
     print ONE_TEB + get_async_gendate_data_len(func)
     print ONE_TEB + "data->realloc_buf();"
@@ -433,7 +433,7 @@ def show_async_callback(func):
 
 def show_by_output_cases():
     for func in funcs:
-        print TWO_TEB + "case client_function_callback_type_" + func[
+        print TWO_TEB + "case client_function_callback_type_" + port+ "_" + func[
             "func_name"] + ":"
         print TWO_TEB + "{"
         show_to_buf(func)
@@ -475,7 +475,7 @@ def show_skip_buf(func):
 
 def show_by_input_cases():
     for func in funcs:
-        print TWO_TEB + "case server_function_callback_type_" + func[
+        print TWO_TEB + "case server_function_callback_type_" + port+ "_" + func[
             "func_name"] + ":"
         print TWO_TEB + "{"
         show_skip_buf(func)

@@ -28,7 +28,7 @@ def show_client_func_type(funcs, port):
 
 
 def show_server_func_type(funcs, port):
-    print "enum server_function_callback_type"
+    print "enum server_function_callback_type_" + port
     print "{"
     for f in funcs:
         print ONE_TEB + "server_function_callback_type_" + port+ "_" + f["func_name"] + ","

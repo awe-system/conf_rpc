@@ -19,7 +19,7 @@ def show_head(port):
 
 
 def show_client_func_type(funcs, port):
-    print "enum client_function_callback_type"
+    print "enum client_function_callback_type_" + port
     print "{"
     for f in funcs:
         print ONE_TEB + "client_function_callback_type_" + port+ "_"  + f["func_name"] + ","

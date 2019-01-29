@@ -12,7 +12,7 @@ def help(arg):
     print "need xml path"
 
 
-def show_include(namespace,filename):
+def show_include(namespace, filename):
     str = "#include <lt_data_translator.h>\n"
     str += "#include \"" + filename + ".h\"\n"
     str += "#include \"awe_conf/env.h\"\n"
@@ -30,7 +30,7 @@ def show_end():
 
 
 def show_handler_head(classname):
-    print "class " + classname + "_thread_handler : public callback_handler"
+    print "class " + classname + "_thread_handler : public " + classname + "_callback_handler"
     print "{"
     print "public:"
 
@@ -43,8 +43,10 @@ def show_callback_head(func):
     print "\n" + ONE_TEB + gfs.client_inter_cb_head(func) + " override"
     print ONE_TEB + "{"
 
+
 def show_callback_end():
     print ONE_TEB + "}"
+
 
 def show_async_callback(func):
     print TWO_TEB + classname + " *node = (" + classname + " *)internal_pri;"
@@ -53,16 +55,17 @@ def show_async_callback(func):
 
 
 def show_sync_callback(func):
-    if(gfs.in_param_num(func) > 0 ):
+    if (gfs.in_param_num(func) > 0):
         print TWO_TEB + "lt_data_t res_data(" + gfs.client_sync_subasync_out_totalsize(
-        func) + ");"
+            func) + ");"
         print TWO_TEB + "unsigned char *res_buf = res_data.get_buf();"
     print gfs.gen_cb_tanslate_params2buf(func, TWO_TEB, "res_buf")
     print TWO_TEB + "lt_condition *_internal_sync_cond = (lt_condition *) internal_pri;"
-    if(gfs.in_param_num(func) > 0 ):
+    if (gfs.in_param_num(func) > 0):
         print TWO_TEB + "_internal_sync_cond->notify(res_data, error_internal);"
     else:
         print TWO_TEB + "_internal_sync_cond->notify();"
+
 
 def show_callback(func):
     show_callback_head(func)
@@ -72,10 +75,12 @@ def show_callback(func):
         show_async_callback(func)
     show_callback_end()
 
+
 def show_callbacks(funcs):
     for func in funcs:
         if (func["type"] == "async"):
             show_callback(func)
+
 
 def show_handler(classname, funcs):
     show_handler_head(classname)
@@ -85,7 +90,7 @@ def show_handler(classname, funcs):
 
 def show_static(classname):
     print "static " + classname + "_thread_handler handler;"
-    print "static client_callback cb(max(" + classname + "_threadnum.get_int(),1), &handler);"
+    print "static " + classname + "_client_callback cb(max(" + classname + "_threadnum.get_int(),1), &handler);"
 
 
 def show_fix(classname):
@@ -155,7 +160,7 @@ if __name__ == '__main__':
     namespace = client["namespace"]
     classname = client["classname"]
     filename = client["filename"]
-    show_include(namespace,filename)
+    show_include(namespace, filename)
     show_head(namespace, classname, project)
     show_handler(classname, funcs)
     show_static(classname)

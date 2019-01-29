@@ -1,4 +1,3 @@
-client_callback::client_callback(int thread_num, callback_handler *cb_handler) :
         cb_handler(cb_handler),
         server(thread_num),
         lt_session_cli_set(NULL, this),

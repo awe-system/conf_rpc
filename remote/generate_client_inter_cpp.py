@@ -59,7 +59,35 @@ def show_port(port):
 
 def show_client_common():
     print commands.getoutput("cat ./src/client_cpp_body")
+    print classname + "_client::" + classname + "_client(" + classname + "_client_callback *_cb) : cb(_cb), sess(NULL)"
+    print "{}"
     print ""
+    print "int " + classname + "_client::connect(const std::string &ip)"
+    print "{"
+    print ONE_TEB + "std::lock_guard<std::mutex> lck(m);"
+    print ONE_TEB + "if ( sess )"
+    print TWO_TEB + "return 0;"
+    print ONE_TEB + "sess = cb->get_session(ip);"
+    print ONE_TEB + "if ( !sess )"
+    print TWO_TEB + "return -RPC_ERROR_TYPE_CONNECT_FAIL;"
+    print ONE_TEB + "try"
+    print ONE_TEB + "{"
+    print TWO_TEB + "sess->connect(ip, SERVER_PORT);"
+    print ONE_TEB + "} catch (...)"
+    print ONE_TEB + "{"
+    print TWO_TEB + "return -RPC_ERROR_TYPE_CONNECT_FAIL;"
+    print ONE_TEB + "}"
+    print ONE_TEB + "return RPC_ERROR_TYPE_OK;"
+    print  "}"
+    print ""
+    print "void " + classname + "_client::disconnect()"
+    print "{"
+    print ONE_TEB + " std::lock_guard < std::mutex > lck(m);"
+    print ONE_TEB + "if (!sess) return;"
+    print ONE_TEB + "sess->disconnect();"
+    print ONE_TEB + "cb->put_session(sess);"
+    print ONE_TEB + "sess = NULL;"
+    print "}"
 
 
 def generate_param(param):
@@ -94,7 +122,7 @@ def client_func_params(func):
 
 
 def show_client_func_def(func):
-    str = "int client::" + func["func_name"] + "("
+    str = "int " + classname + "_client::" + func["func_name"] + "("
     str += client_func_params(func)
 
     if func["type"] == "sync":
@@ -148,8 +176,9 @@ def show_sync_to_buf(func):
 def show_sync_client_func(func):
     print ONE_TEB + "int error_internal = 0;"
     print ONE_TEB + "lt_condition _internal_sync_cond;"
-    print ONE_TEB + "cb->snd(sess, boost::bind(&client::" + func[
-        "func_name"] + "_gendata, this, " + put_sync_gendata_params_no_def(
+    print ONE_TEB + "cb->snd(sess, boost::bind(&" + classname + "_client::" + \
+          func[
+              "func_name"] + "_gendata, this, " + put_sync_gendata_params_no_def(
         func) + " &_internal_sync_cond, internal_pri, _1));"
     print ONE_TEB + "int err_internal = _internal_sync_cond.wait();"
     print ONE_TEB + "if ( err_internal < 0 )"
@@ -178,8 +207,9 @@ def put_async_gendata_params_no_def(func):
 def show_async_client_func(func):
     print ONE_TEB + "if ( !sess )"
     print TWO_TEB + "return -RPC_ERROR_TYPE_CONNECT_FAIL;"
-    print ONE_TEB + "return cb->snd(sess, boost::bind(&client::" + func[
-        "func_name"] + "_gendata, this, " + put_async_gendata_params_no_def(
+    print ONE_TEB + "return cb->snd(sess, boost::bind(&" + classname + "_client::" + \
+          func[
+              "func_name"] + "_gendata, this, " + put_async_gendata_params_no_def(
         func) + " internal_pri, _1));"
 
 
@@ -206,7 +236,7 @@ def put_sync_gendata_params(func):
 
 
 def show_sync_generate_data_func_def(func):
-    str = "int client::"
+    str = "int " + classname + "_client::"
     str += func["func_name"] + "_gendata" + "("
     out_str = put_sync_gendata_params(func)
     if len(out_str) > 0:
@@ -262,8 +292,8 @@ def show_by_buf(func):
 def show_sync_generate_data_func(func):
     show_sync_generate_data_func_def(func)
     print "{"
-    print ONE_TEB + "unsigned int func_type = server_function_callback_type_"+ \
-          port+ "_"  + func["func_name"] + ";"
+    print ONE_TEB + "unsigned int func_type = server_function_callback_type_" + \
+          port + "_" + func["func_name"] + ";"
 
     for param in func["params"]:
         if param["param_value"] == "data":
@@ -289,7 +319,7 @@ def put_async_gendata_params(func):
 
 
 def show_async_generate_data_func_def(func):
-    str = "int client::"
+    str = "int " + classname + "_client::"
     str += func["func_name"] + "_gendata" + "("
     out_str = put_async_gendata_params(func)
     if len(out_str) > 0:
@@ -330,7 +360,7 @@ def show_async_generate_data_func(func):
     show_async_generate_data_func_def(func)
     print "{"
     print ONE_TEB + "unsigned int func_type = server_function_callback_type_" + \
-          port+ "_" + func["func_name"] + ";"
+          port + "_" + func["func_name"] + ";"
     show_request_data(func)
     print ONE_TEB + get_async_gendate_data_len(func)
     print ONE_TEB + "data->realloc_buf();"
@@ -348,6 +378,8 @@ def show_client_gendata():
 
 
 def show_client_callback_head():
+    print classname + "_client_callback::" + classname + "_client_callback(int thread_num," \
+        " " + classname + "_callback_handler *cb_handler) :"
     print commands.getoutput("cat ./src/client_callback_head")
 
 
@@ -433,8 +465,9 @@ def show_async_callback(func):
 
 def show_by_output_cases():
     for func in funcs:
-        print TWO_TEB + "case client_function_callback_type_" + port+ "_" + func[
-            "func_name"] + ":"
+        print TWO_TEB + "case client_function_callback_type_" + port + "_" + \
+              func[
+                  "func_name"] + ":"
         print TWO_TEB + "{"
         show_to_buf(func)
         if func["type"] == "sync":
@@ -446,7 +479,7 @@ def show_by_output_cases():
 
 
 def show_by_output():
-    print "void client_callback::handler_by_output(lt_data_t *received_data)"
+    print "void " + classname + "_client_callback::handler_by_output(lt_data_t *received_data)"
     print "{"
     print ONE_TEB + "unsigned char *buf = received_data->get_buf();"
     print ONE_TEB + "unsigned int func_type = lt_data_translator::to_uint(buf);"
@@ -475,8 +508,9 @@ def show_skip_buf(func):
 
 def show_by_input_cases():
     for func in funcs:
-        print TWO_TEB + "case server_function_callback_type_" + port+ "_" + func[
-            "func_name"] + ":"
+        print TWO_TEB + "case server_function_callback_type_" + port + "_" + \
+              func[
+                  "func_name"] + ":"
         print TWO_TEB + "{"
         show_skip_buf(func)
         if func["type"] == "sync":
@@ -503,7 +537,7 @@ def show_by_input_cases():
 
 
 def show_by_input():
-    print "void client_callback::handler_by_input(lt_data_t *sent_data, int error_internal)"
+    print "void " + classname + "_client_callback::handler_by_input(lt_data_t *sent_data, int error_internal)"
     print "{"
     print ONE_TEB + "unsigned char *buf = sent_data->get_buf();"
     print ONE_TEB + "unsigned int func_type = lt_data_translator::to_uint(buf);"
@@ -533,6 +567,7 @@ if __name__ == '__main__':
     funcs, port, client, server, project = lx.load_xml(argv[1])
     namespace = client["namespace"]
     filename = client["filename"] + "_internal"
+    classname = client["classname"]
     show_include(namespace, filename)
     show_port(port)
     show_client_common()

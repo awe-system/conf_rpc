@@ -91,8 +91,8 @@ def callback_handler_output_params(func):
     return str[:len(str) - 2]
 
 
-def show_callback_handler():
-    print "class callback_handler"
+def show_callback_handler(classname):
+    print "class " + classname + "_callback_handler"
     print "{"
     print "public:"
     for func in funcs:
@@ -106,14 +106,14 @@ def show_callback_handler():
     print "};\n"
 
 
-def show_client_callback():
-    print "class client_callback : public lt_client_service, public lt_session_cli_set"
+def show_client_callback(classname):
+    print "class " + classname + "_client_callback : public lt_client_service, public lt_session_cli_set"
     print "{"
     print "private:"
-    print ONE_TEB + "callback_handler *cb_handler;"
+    print ONE_TEB + classname + "_callback_handler *cb_handler;"
     print ONE_TEB + "lt_thread_server server;\n"
     print "public:"
-    print ONE_TEB + "client_callback(int thread_num, callback_handler *cb_handler);\n"
+    print ONE_TEB + classname + "_client_callback(int thread_num, " + classname + "_callback_handler *cb_handler);\n"
     print "private:"
     print ONE_TEB + "void handler_by_output(lt_data_t *received_data) override;\n"
     print ONE_TEB + "void handler_by_input(lt_data_t *sent_data, int error_internal) override;\n"
@@ -121,14 +121,14 @@ def show_client_callback():
 
 
 def show_client_head():
-    print "class client"
+    print "class " + classname + "_client"
     print "{"
     print "private:"
-    print ONE_TEB + "client_callback *cb;"
+    print ONE_TEB + classname + "_client_callback *cb;"
     print ONE_TEB + "std::mutex m;"
     print ONE_TEB + "lt_session_cli_safe *sess;\n"
     print "public:"
-    print ONE_TEB + "client(client_callback *_cb);\n"
+    print ONE_TEB + classname + "_client(" + classname + "_client_callback *_cb);\n"
     print ONE_TEB + "int connect(const std::string &ip);\n"
     print ONE_TEB + "void disconnect();\n"
 
@@ -243,10 +243,11 @@ if __name__ == '__main__':
     funcs, port, client, server, project = lx.load_xml(argv[1])
     namespace = client["namespace"]
     filename = client["filename"] + "_internal"
+    classname = client["classname"]
     show_def(namespace, filename)
     gf.show_all(port, funcs)
     show_include(namespace)
-    show_callback_handler()
-    show_client_callback()
+    show_callback_handler(classname)
+    show_client_callback(classname)
     show_client()
     show_end()

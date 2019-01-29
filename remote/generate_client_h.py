@@ -31,7 +31,7 @@ def show_main_head(namespace, classname):
     print "namespace " + namespace + "\n{\n"
     print "class " + classname + "\n{\n"
     print "private:"
-    print ONE_TEB + "client cli;\n"
+    print ONE_TEB + classname + "_client cli;\n"
     print "public:"
     print ONE_TEB + classname + "();"
     print ONE_TEB + "int connect(const std::string &ip);"
@@ -77,8 +77,8 @@ def show_main_end(funcs):
     print "}"
 
 
-def show_main_class(namespace,classname, funcs):
-    show_main_head(namespace,classname)
+def show_main_class(namespace, classname, funcs):
+    show_main_head(namespace, classname)
     show_callbacks(funcs)
     show_funcs(funcs)
     show_main_end(funcs)
@@ -94,5 +94,5 @@ if __name__ == '__main__':
     filename = client["filename"]
     show_def(namespace, filename)
     show_include(filename)
-    show_main_class(namespace, classname,funcs)
+    show_main_class(namespace, classname, funcs)
     show_end()

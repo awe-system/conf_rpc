@@ -526,10 +526,17 @@ def show_by_input_cases():
                           "param_name"] + " = lt_data_translator::to_" + param[
                           "param_value"] + "(buf);"
             for param in func["params"]:
-                if param["param_type"] != "in":
+                if param["param_type"] == "out":
                     print THREE_TEB + param_declare_tab[
                         param["param_value"]] + BLANK + param[
                               "param_name"] + ";"
+                elif param["param_type"] == "inout":
+                    print THREE_TEB + param_declare_tab[
+                        param["param_value"]] + BLANK + param[
+                              "param_name"] + " = lt_data_translator::to_" + param[
+                        "param_value"] + "(buf);"
+
+            #FIXME
             print THREE_TEB + "void * internal_pri;"
             show_async_callback(func)
         print TWO_TEB + "}"

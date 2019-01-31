@@ -536,7 +536,7 @@ def show_by_input_cases():
                               "param_name"] + " = lt_data_translator::to_" + param[
                         "param_value"] + "(buf);"
 
-            print THREE_TEB + "void * internal_pri;"
+            print THREE_TEB + "void * internal_pri = lt_data_translator::to_void_p(buf);"
             show_async_callback(func)
         print TWO_TEB + "}"
         print THREE_TEB + "break;"

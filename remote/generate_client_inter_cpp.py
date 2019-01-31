@@ -495,15 +495,15 @@ def show_by_output():
 def show_skip_buf(func):
     if func["type"] == "sync":
         for param in func["params"]:
-            if param["param_type"] != "out":
+            if param["param_type"] == "in":
                 print THREE_TEB + "lt_data_translator::skip_" + param[
                     "param_value"] + "(buf);"
     else:
         for param in func["params"]:
-            if param["param_type"] != "out":
+            if param["param_type"] == "in":
                 print THREE_TEB + "lt_data_translator::skip_" + param[
                     "param_value"] + "(buf);"
-    print THREE_TEB + "lt_data_translator::skip_void_p(buf);"
+
 
 
 def show_by_input_cases():
@@ -536,7 +536,6 @@ def show_by_input_cases():
                               "param_name"] + " = lt_data_translator::to_" + param[
                         "param_value"] + "(buf);"
 
-            #FIXME
             print THREE_TEB + "void * internal_pri;"
             show_async_callback(func)
         print TWO_TEB + "}"

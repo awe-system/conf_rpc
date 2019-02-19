@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<suits>
+    <project name="iceberg" />
+
+    <suit name="physical_disk">
+        <case name="0"/>
+    </suit>
+
+    <suit name="dis_scanner">
+        <case name="0"/>
+        <case name="1"/>
+        <case name="5"/>
+    </suit>
+
+</suits>

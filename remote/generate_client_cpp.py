@@ -34,7 +34,7 @@ def show_handler_head(classname):
     print "{"
     print "private:"
     print ONE_TEB + "std::mutex              connected_list_m;"
-    print ONE_TEB + "std::list<testclient *> connected_list;"
+    print ONE_TEB + "std::list<"+classname+" *> connected_list;"
     print "public:"
 
 
@@ -85,8 +85,8 @@ def show_callbacks(funcs):
             show_callback(func)
 
 
-def show_static_callbacks():
-    print ONE_TEB + "void addcli_to_event(testclient *cli)"
+def show_static_callbacks(classname):
+    print ONE_TEB + "void addcli_to_event("+classname+" *cli)"
     print ONE_TEB + "{"
     print TWO_TEB + "std::unique_lock<std::mutex> lck(connected_list_m);"
     print TWO_TEB + "connected_list.push_back(cli);"
@@ -94,11 +94,11 @@ def show_static_callbacks():
     print ONE_TEB + "void disconnected(lt_session *sess) override"
     print ONE_TEB + "{"
     print TWO_TEB + "std::unique_lock<std::mutex> lck(connected_list_m);"
-    print TWO_TEB + "std::list<testclient *>      org_connected_list = connected_list;"
+    print TWO_TEB + "std::list<"+classname+" *>      org_connected_list = connected_list;"
     print TWO_TEB + "connected_list.clear();"
     print TWO_TEB + "while ( !org_connected_list.empty() )"
     print TWO_TEB + "{"
-    print THREE_TEB + "testclient *cli = org_connected_list.front();"
+    print THREE_TEB + classname+" *cli = org_connected_list.front();"
     print THREE_TEB + "org_connected_list.pop_front();"
     print THREE_TEB + "cli->disconnected_internal();"
     print TWO_TEB + "}"
@@ -108,7 +108,7 @@ def show_static_callbacks():
 def show_handler(classname, funcs):
     show_handler_head(classname)
     show_callbacks(funcs)
-    show_static_callbacks()
+    show_static_callbacks(classname)
     show_handler_end()
 
 

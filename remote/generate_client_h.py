@@ -27,14 +27,26 @@ def show_end():
     print "#endif"
 
 
-def show_main_head(namespace, classname):
+def show_main_head(namespace, classname, withping):
     print "namespace " + namespace + "\n{\n"
     print "class " + classname + "\n{\n"
     print "private:"
+
+    if (withping):
+        print ONE_TEB + "bool to_destroy;"
+        print ONE_TEB + "std::thread * th;"
+    print ONE_TEB + "lt_condition discon_cond;"
+    print ONE_TEB + "std::mutex disconn_m;"
+    print ONE_TEB + "bool is_now_connected;"
+    print ONE_TEB + "bool is_user_discon;"
     print ONE_TEB + classname + "_client cli;\n"
     print "public:"
     print ONE_TEB + classname + "();"
+    if (withping):
+        print ONE_TEB + "~" + classname + "();"
+        print ONE_TEB + "void run();"
     print ONE_TEB + "int connect(const std::string &ip);"
+    print ONE_TEB + "void disconnect_async();"
     print ONE_TEB + "void disconnect();\n"
 
 
@@ -66,6 +78,8 @@ def show_funcs(funcs):
 
 def show_callbacks(funcs):
     print "public:"
+    print ONE_TEB + "void disconnected_internal();"
+    print ONE_TEB + "virtual void disconnected();"
     for func in funcs:
         if (func["type"] == "async" and func["subtype"] != "sync"):
             show_async_callback(func)
@@ -77,8 +91,8 @@ def show_main_end(funcs):
     print "}"
 
 
-def show_main_class(namespace, classname, funcs):
-    show_main_head(namespace, classname)
+def show_main_class(namespace, classname, funcs, withping):
+    show_main_head(namespace, classname, withping)
     show_callbacks(funcs)
     show_funcs(funcs)
     show_main_end(funcs)
@@ -92,7 +106,8 @@ if __name__ == '__main__':
     namespace = client["namespace"]
     classname = client["classname"]
     filename = client["filename"]
+    withping = client["withping"]
     show_def(namespace, filename)
     show_include(filename)
-    show_main_class(namespace, classname, funcs)
+    show_main_class(namespace, classname, funcs, withping)
     show_end()

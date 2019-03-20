@@ -65,11 +65,12 @@ def show_client_common():
     print "int " + classname + "_client::connect(const std::string &ip)"
     print "{"
     print ONE_TEB + "std::lock_guard<std::mutex> lck(m);"
-    print ONE_TEB + "if ( sess )"
-    print TWO_TEB + "return 0;"
-    print ONE_TEB + "sess = cb->get_session(ip);"
     print ONE_TEB + "if ( !sess )"
-    print TWO_TEB + "return -RPC_ERROR_TYPE_CONNECT_FAIL;"
+    print ONE_TEB + "{"
+    print TWO_TEB + "sess = cb->get_session(ip);"
+    print TWO_TEB + "if ( !sess )"
+    print THREE_TEB + "return -RPC_ERROR_TYPE_CONNECT_FAIL;"
+    print ONE_TEB + "}"
     print ONE_TEB + "try"
     print ONE_TEB + "{"
     print TWO_TEB + "sess->connect(ip, SERVER_PORT);"
@@ -554,12 +555,21 @@ def show_by_input():
     print THREE_TEB + "abort();"
     print ONE_TEB + "}"
     print "}"
+    print ""
 
+def show_disconnected():
+    print "void " + classname + "_client_callback::disconnected(lt_session *sess)"
+    print "{"
+    print ONE_TEB + "lt_client_service::disconnected(sess);"
+    print ONE_TEB + "cb_handler->disconnected(sess);"
+    print "}"
+    print ""
 
 def show_client_callback():
     show_client_callback_head()
     show_by_output()
     show_by_input()
+    show_disconnected()
 
 
 def show_end():

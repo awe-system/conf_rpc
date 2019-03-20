@@ -3,7 +3,8 @@ from sys import argv
 import generate_function_type_h as gf
 
 BLANK = " "
-ONE_TEB = "    "
+ONE_TAB = "    "
+TWO_TAB = ONE_TAB + ONE_TAB
 
 type_tab = {
     "in": "IN",
@@ -92,7 +93,7 @@ def server_handler_async_params(func):
 
 
 def show_handler_func(func):
-    str = ONE_TEB + "virtual int "
+    str = ONE_TAB + "virtual int "
     str += func["func_name"] + "("
     if func["type"] == "sync":
         out_str = server_handler_sync_params(func)
@@ -102,7 +103,9 @@ def show_handler_func(func):
     if len(out_str) > 0:
         str += out_str
 
-    if func["type"] == "sync":
+    if func["func_name"] == "ping_internal":
+        str += "){return 0;};\n"
+    elif func["type"] == "sync":
         str += ") = 0;\n"
     elif len(out_str) > 0:
         str += ", lt_session_description *server_context) = 0;\n"
@@ -137,7 +140,7 @@ def handler_done_output_params(func):
 
 
 def show_handler_done_func(func):
-    str = ONE_TEB + "virtual void "
+    str = ONE_TAB + "virtual void "
     str += func["func_name"] + "_done" + "("
     out_str = handler_done_output_params(func)
     if len(out_str) > 0:
@@ -174,7 +177,7 @@ def put_sync_gendata_params(func):
 
 
 def show_sync_generate_data_func(func):
-    str = ONE_TEB + "int "
+    str = ONE_TAB + "int "
     str += func["func_name"] + "_gendata" + "("
     out_str = put_sync_gendata_params(func)
     if len(out_str) > 0:
@@ -208,7 +211,7 @@ def put_async_gendata_params(func):
 
 
 def show_async_generate_data_func(func):
-    str = ONE_TEB + "int "
+    str = ONE_TAB + "int "
     str += func["func_name"] + "_done_gendata" + "("
     out_str = put_async_gendata_params(func)
     if len(out_str) > 0:
@@ -249,7 +252,7 @@ def async_done_fun_params(func):
 
 
 def show_async_done_func(func):
-    str = ONE_TEB + "void "
+    str = ONE_TAB + "void "
     str += func["func_name"] + "_done" + "("
     out_str = async_done_fun_params(func)
     if len(out_str) > 0:
@@ -268,17 +271,26 @@ def show_server_class():
     print "class server : public lt_server_callback, public server_handler_done"
     print "{"
     print "private:"
-    print ONE_TEB + "lt_server_service service;\n"
-    print ONE_TEB + "server_handler *handler;\n"
+    print ONE_TAB + "lt_server_service service;\n"
+    print ONE_TAB + "server_handler *handler;\n"
     print "public:"
-    print ONE_TEB + "server(int thread_num, server_handler *_handler);\n"
-    print ONE_TEB + "void do_func(lt_data_t *data, lt_session_serv *sess) override;\n"
+    print ONE_TAB + "server(int thread_num, server_handler *_handler);\n"
+    print ONE_TAB + "void do_func(lt_data_t *data, lt_session_serv *sess) override;\n"
     print "private:"
     show_generate_data_funcs()
     print "public:"
     show_async_done_funcs()
     print "};"
 
+def show_total_server(classname):
+    print "class " + classname + ":  public server, public server_handler"
+    print "{"
+    print "public:"
+    print ONE_TAB + classname + "(int threadnum):"
+    print TWO_TAB + "server(threadnum, (server_handler *)this)"
+    print ONE_TAB + "{}"
+    print "};"
+    print ""
 
 def show_class_end():
     print "}"
@@ -292,10 +304,12 @@ if __name__ == '__main__':
     funcs, port, client, server,project = lx.load_xml(argv[1])
     namespace = server["namespace"]
     filename = server["filename"]
+    classname = server["classname"]
     show_def(namespace, filename)
     gf.show_all(port, funcs)
     show_include(namespace)
     show_server_handler()
     show_server_handler_done()
     show_server_class()
+    show_total_server(classname)
     show_class_end()

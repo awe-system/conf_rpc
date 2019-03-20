@@ -14,8 +14,9 @@
      -->
 
     <port content="8088"/>
+    <project content="test_comm"/>
 
-    <client type="C++" namespace="client2cachenode" filename="client2cachenode"/>
+    <client type="C++" namespace="client2cachenode" filename="client2cachenode" withping="true"/>
     <server type="C++" namespace="cachenode" filename="cachenode2client"/>
     <!--<function_type type="C++" namespace="" filename="function_type"/>-->
 

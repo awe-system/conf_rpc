@@ -95,6 +95,7 @@ def show_callback_handler(classname):
     print "class " + classname + "_callback_handler"
     print "{"
     print "public:"
+    print ONE_TEB + "virtual void disconnected(lt_session *sess) = 0;"
     for func in funcs:
         if func["type"] == "async":
             str = ONE_TEB + "virtual void " + func["func_name"] + "_callback("
@@ -117,6 +118,8 @@ def show_client_callback(classname):
     print "private:"
     print ONE_TEB + "void handler_by_output(lt_data_t *received_data) override;\n"
     print ONE_TEB + "void handler_by_input(lt_data_t *sent_data, int error_internal) override;\n"
+    print "protected:"
+    print ONE_TEB + "virtual void disconnected(lt_session *sess) override;"
     print "};\n"
 
 

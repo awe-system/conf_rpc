@@ -67,7 +67,7 @@ def delete_cpp_endpart(lines, suit_name):
 
 
 def add_h_endpart(lines, project_name, suit_name):
-    lines.append("//NOTE:PLEASE DO NOT CHANGE THE FOLLOWING\n")
+    lines.append("\n//NOTE:PLEASE DO NOT CHANGE THE FOLLOWING\n")
     lines.append("};\n\n")
     newline = "#endif //" + make_defname(project_name, suit_name) + "\n"
     lines.append(newline);

@@ -34,7 +34,7 @@ def show_h_end(project, suit_name):
 
 def show_case(case):
     str = ""
-    str += ONE_TEB + "int case_" + case["name"] + "();\n"
+    str += ONE_TEB + "int case_" + case["name"] + "();\n\n"
     return str
 
 def show_cases(cases):

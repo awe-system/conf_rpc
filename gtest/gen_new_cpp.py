@@ -39,7 +39,7 @@ def show_case_func(suit_name, case_name):
     return str
 
 def show_case_def(case_name):
-    str = "EXPECT_EQ(0, case_" + case_name + "()); \n"
+    str = ONE_TEB + "EXPECT_EQ(0, case_" + case_name + "()); \n"
     return str
 
 

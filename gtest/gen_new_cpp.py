@@ -8,6 +8,7 @@ ONE_TEB = "    "
 TWO_TEB = "        "
 THREE_TEB = "            "
 
+
 def show_include(suit_name):
     str = "#include \"" + suit_name + ".h\"\n\n"
     return str
@@ -18,13 +19,20 @@ def show_fix_func(suit_name):
     str += "void suit_" + suit_name + "::SetUp()\n"
     str += "{\n"
     str += ONE_TEB + "//Implement this if necessary\n"
+    str += ONE_TEB + "dbg << color_yellow <<\n"
+    str += TWO_TEB + " \"+++++++++++++++ " + suit_name + " start ++++++++++++++++\"\n"
+    str += TWO_TEB + "<<end_dbgl;\n"
     str += "}\n\n"
 
     str += "void suit_" + suit_name + "::TearDown()\n"
     str += "{\n"
     str += ONE_TEB + "//Implement this if necessary\n"
+    str += ONE_TEB + "dbg << color_green <<\n"
+    str += TWO_TEB + " \"+++++++++++++++ " + suit_name + " end ++++++++++++++++\"\n"
+    str += TWO_TEB + "<<end_dbgl;\n"
     str += "}\n\n"
     return str
+
 
 def show_case_func(suit_name, case_name):
     str = "int suit_" + suit_name + "::case_" + case_name + "()\n{\n"
@@ -37,6 +45,7 @@ def show_case_func(suit_name, case_name):
     str += ONE_TEB + "}\n"
     str += ONE_TEB + "return 0;\n}\n\n"
     return str
+
 
 def show_case_def(case_name):
     str = ONE_TEB + "EXPECT_EQ(0, case_" + case_name + "()); \n"

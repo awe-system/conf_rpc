@@ -1,0 +1,11 @@
+#!/bin/bash
+
+echo "$0 <xml_path> <clifiles> <clipath> <serverfiles> <serverpath>"
+
+cd $(dirname $0)
+cur_path=$(pwd)
+rm -rf output/*
+python2.7 generate_all.py $1 
+cd -
+cp -f $cur_path/output/$2 $3
+cp -f $cur_path/output/$4 $5

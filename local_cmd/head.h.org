@@ -109,7 +109,7 @@ private:
     boost::asio::local::stream_protocol::acceptor _acceptor;
 
 public:
-    event(event_handler *p_event_handler);
+    event(event_handler *p_event_handler, const std::string & socket_path="");
 
     void handle_accept(boost::shared_ptr<session> new_session, boost::system::error_code error);
 };

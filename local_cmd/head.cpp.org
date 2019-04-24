@@ -57,12 +57,13 @@ void session::handle_write(const boost::system::error_code &error)
 
 }
 
-event::event(event_handler *p_event_handler) :
+event::event(event_handler *p_event_handler, const std::string & socket_path) :
         _file(),
         _io_service(),
         _handler(p_event_handler),
         _acceptor(_io_service, boost::asio::local::stream_protocol::endpoint(_file._name))
 {
+    if(socket_path != "") _file._name = socket_path;
     session_ptr new_session(new session(&_handler, _io_service));
     _acceptor.async_accept(new_session->socket(),
                            boost::bind(&event::handle_accept, this, new_session,

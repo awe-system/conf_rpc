@@ -31,11 +31,11 @@ def gen_bool_tab():
 
 
 def gen_socket_path():
-    res_str = "def socket_path():return \""
+    res_str = "_socket_path = \""
     res_str += sock_path
     res_str += "\"\n\n"
+    res_str += "def socket_path():return _socket_path\n\n"
     return res_str
-
 
 def gen_send_cmd():
     res_str = "def recv_basic(the_socket):\n"
@@ -111,6 +111,8 @@ def value_set(func):
     for param in func["params"]:
         res_str += value_set_param(param, i)
         i += 1
+    res_str += "\tglobal _socket_path\n"
+    res_str += "\tif(len(arg) > " + str(i-1) +"): _socket_path = arg[" + str(i-1)+"]\n"
     return res_str
 
 
@@ -205,6 +207,7 @@ def gen_help():
             res_str += ")["
             res_str += param["param_type"]
             res_str += "] "
+        res_str += " [socket_path]"
         res_str += "\"\n"
     res_str += "\n"
     return res_str

@@ -3,7 +3,7 @@
 # Project created by QtCreator 2019-04-22T10:12:52
 #
 #-------------------------------------------------
-
+#sudo apt-get install libgl1-mesa-dev
 QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets xml

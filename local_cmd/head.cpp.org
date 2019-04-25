@@ -34,6 +34,7 @@ void session::handle_read(const boost::system::error_code &error)
         cmd_line = cmd_line.substr(0, pos);
         std::cout << cmd_line << std::endl;
         p_event->do_func(cmd_line, data_out);
+        std::cout << data_out << std::endl;
         boost::asio::async_write(socket_, boost::asio::buffer(data_out),
                                  boost::bind(&session::handle_write,
                                              shared_from_this(),

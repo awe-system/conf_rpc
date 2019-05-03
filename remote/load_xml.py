@@ -46,7 +46,7 @@ def bool_trans(str):
     elif str == "false":
         return False
     else :
-        print str
+        print(str)
 
 
 def load_client(child):
@@ -54,7 +54,7 @@ def load_client(child):
     res = {"type": client_type}
     res.update({"filename": child.getAttribute("filename")})
     res.update({"withping": bool_trans(safegetattr(child,"withping","false"))})
-    if client_type == "C++":
+    if client_type == "C++" or client_type == "python":
         namespace = child.getAttribute("namespace")
         res.update({"namespace": namespace})
         classname = child.getAttribute("classname")
@@ -112,5 +112,5 @@ def load_xml(filen):
     return funcs, port, client, server, project
 
 if __name__ == '__main__':
-    print json.dumps(load_xml("./example.xml"))
+    print( json.dumps(load_xml("./example.xml")))
 

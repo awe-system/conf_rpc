@@ -7,7 +7,7 @@ global path
 def gen_python_client(client, xml):
     filename = client["filename"]
     cmd = "python "+path+"generate_local_python_client.py " + xml + " > ./output/" + filename + ".py"
-    print cmd
+    print(cmd)
     os.system(cmd)
 
 
@@ -23,10 +23,10 @@ def gen_client(client, xml):
 def gen_cpp_server(server, xml):
     filename = server["filename"]
     cmd = "python "+path+"generate_local_cpp_server_h.py " + xml + " > ./output/" + filename + ".h"
-    print cmd
+    print(cmd)
     os.system(cmd)
     cmd = "python "+path+"generate_local_cpp_server_cpp.py " + xml + " > ./output/" + filename + ".cpp"
-    print cmd
+    print(cmd)
     os.system(cmd)
 
 
@@ -42,9 +42,9 @@ def gen_server(server, xml):
 if __name__ == '__main__':
     path = os.path.abspath(argv[0])
     path = os.path.dirname(path) + '/'
-    print path
+    print(path)
     if (len(argv) < 2):
-        print "need xml"
+        print("need xml")
         exit(1)
 
     funcs, sock, client, server = lx.load_xml(argv[1])

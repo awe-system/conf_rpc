@@ -163,14 +163,17 @@ def from_arg_char_p(arg):
 
 file_tab = {}
 
-def from_arg_inputdata(arg,val_name):
+def from_arg_indata(arg,val_name):
     data = lt_data_t()
     data.read_from_file(arg)
     file_tab[val_name] = arg
     return data
 
-def from_arg_ouputdata(arg,val_name):
+def from_arg_outdata(arg,val_name):
     file_tab[val_name] = arg
+
+def from_arg_inoutdata(arg,val_name):
+    from_arg_indata(arg, val_name)
 
 ################################################################################
 #返回一个可以用json.dumps的字典

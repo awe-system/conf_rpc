@@ -5,7 +5,6 @@
     def snd_rcv(self, snd_data):
         try:
             self.s.send(snd_data.get_buf())
-            len_bytes = bytes()
             len_bytes = self.s.recv(size_of_ulong())
             data_len = to_unlong(len_bytes)
             if(data_len > max_rcv_len ):raise

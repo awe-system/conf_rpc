@@ -6,7 +6,7 @@ from sys import argv
 def gen_client(xml):
     if(client["type"] == "C++"):
         filename = client["filename"] + "_internal"
-        cmd = "python ./generate_client_inter_h.py " + xml + " > ./output/" + filename + ".h"
+        cmd = "python3 ./generate_client_inter_h.py " + xml + " > ./output/" + filename + ".h"
         print(cmd)
         os.system(cmd)
         cmd = "python ./generate_client_inter_cpp.py " + xml + " > ./output/" + filename + ".cpp"

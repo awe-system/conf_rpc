@@ -109,13 +109,39 @@ def by_data(val):
     return val.get_buf()
 ################################################################################
 def to_unlong(val):
-    return int.from_bytes(val,'little')
+    tmp_val = bytes()
+    i = 0
+    for b in val:
+        if (i < size_of_ulong()):
+            tmp_val += b.to_bytes(1,'little')
+        else:
+            break
+        i = i+1
+    return int.from_bytes(tmp_val, 'little')
+
 
 def to_uint(val):
-    return int.from_bytes(val,'little')
+    tmp_val = bytes()
+    i = 0
+    for b in val:
+        if (i < size_of_uint()):
+            tmp_val += b.to_bytes(1,'little')
+        else:
+            break
+        i = i+1
+    return int.from_bytes(tmp_val, 'little')
+
 
 def to_bool(val):
-    return bool.from_bytes(val, 'little')
+    tmp_val = bytes()
+    i = 0
+    for b in val:
+        if (i < size_of_bool()):
+            tmp_val += b.to_bytes(1,'little')
+        else:
+            break
+        i = i+1
+    return bool.from_bytes(tmp_val, 'little')
 
 def to_void_p(val):
     return to_unlong(val)
@@ -171,9 +197,10 @@ def from_arg_indata(arg,val_name):
 
 def from_arg_outdata(arg,val_name):
     file_tab[val_name] = arg
+    return arg
 
 def from_arg_inoutdata(arg,val_name):
-    from_arg_indata(arg, val_name)
+    return from_arg_indata(arg, val_name)
 
 ################################################################################
 #返回一个可以用json.dumps的字典

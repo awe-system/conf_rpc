@@ -109,10 +109,11 @@ def value_set(func):
     res_str = ""
     i = 0
     for param in func["params"]:
-        res_str += value_set_param(param, i)
-        i += 1
+        if param["param_type"] != "out":
+            res_str += value_set_param(param, i)
+            i += 1
     res_str += "\tglobal _socket_path\n"
-    res_str += "\tif(len(arg) > " + str(i-1) +"): _socket_path = arg[" + str(i-1)+"]\n"
+    res_str += "\tif(len(arg) > " + str(i) +"): _socket_path = arg[" + str(i)+"]\n"
     return res_str
 
 

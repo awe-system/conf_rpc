@@ -19,6 +19,7 @@ class main_window : public QMainWindow
     Q_OBJECT
 
     std::map<std::string, json_obj> funcs;
+    std::vector< json_obj> funcs_by_num;
 private:
 
      void alert(const QString &str);
@@ -42,6 +43,7 @@ private:
 
      void add_key_to_map(const QString &func_key, const json_obj & obj);
      void reove_from_map(const QString &func_key);
+     void reove_from_list(int row);
 
      bool is_xml_empty();
 

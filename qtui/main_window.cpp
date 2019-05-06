@@ -45,12 +45,19 @@ void main_window::add_key_to_map(const QString &func_key,  const json_obj & obj)
         return;
     }
     funcs[func_key.toStdString()] = obj;
+    funcs_by_num.push_back(obj);
 }
 
 void main_window::reove_from_map(const QString &func_key)
 {
     funcs.erase(func_key.toStdString());
 }
+
+void main_window::reove_from_list(int row)
+{
+    funcs_by_num.erase(funcs_by_num.begin()+ row);
+}
+
 
 bool main_window::is_xml_empty()
 {
@@ -187,6 +194,7 @@ void main_window::recovery_func(QDomNode *node)
     recovey_func_name(&e, obj);
     recovey_func_type(&e, obj);
     recovey_func_params(&e, obj);
+    cout<<obj.dumps()<<endl;
     add_json_to_func(obj);
 }
 
@@ -336,13 +344,13 @@ static QString subtype_by_obj(const json_obj & obj)
 
 void main_window::save_func(QXmlStreamWriter *writer)
 {
-    for(auto it : funcs)
+    for(auto it : funcs_by_num)
     {
         writer->writeStartElement("func");
-        writer->writeAttribute("name", it.second[FUNC_NAME].s_val.c_str());
-        writer->writeAttribute("type", functype_by_obj(it.second));
-        if(subtype_by_obj(it.second) != "") writer->writeAttribute("subtype", subtype_by_obj(it.second));
-        save_params(writer, it.second);
+        writer->writeAttribute("name", it[FUNC_NAME].s_val.c_str());
+        writer->writeAttribute("type", functype_by_obj(it));
+        if(subtype_by_obj(it) != "") writer->writeAttribute("subtype", subtype_by_obj(it));
+        save_params(writer, it);
         writer->writeEndElement();
     }
 }
@@ -487,7 +495,7 @@ void main_window::update_color_key_color(QTextEdit *item, const QString &key, co
 
 void main_window::add_string_to_func_list(QString &str)
 {
-    int cur = ui->func_list->currentRow();
+    int cur = ui->func_list->rowCount();
     if(cur == -1)
     {
         cur = 0;
@@ -530,6 +538,7 @@ void main_window::remove_from_listview(int row)
 {
    QTextEdit *item = (QTextEdit *)ui->func_list->cellWidget(row, 0);
    reove_from_map(item->toPlainText());
+   reove_from_list(row);
    delete item;
    ui->func_list->removeRow(row);
 }

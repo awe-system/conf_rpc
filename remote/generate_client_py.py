@@ -118,7 +118,7 @@ def show_gen_data_func(func):
     print(TWO_TAB + "data_len = 0")
     if (func["type"] == "sync"):
         print(TWO_TAB + "_inter_sync_cond = 0 ")
-        print(TWO_TAB + "internal_pri = 0  ")
+    print(TWO_TAB + "internal_pri = 0  ")
     print(TWO_TAB + "func_type = serv_cb_type." + pre_server_type() + "_" + func[
         "func_name"])
     show_gen_param("func_type", "uint")
@@ -127,7 +127,7 @@ def show_gen_data_func(func):
             show_gen_param(param["param_name"], param["param_value"])
     if (func["type"] == "sync"):
         show_gen_param("_inter_sync_cond", "void_p")
-        show_gen_param("internal_pri", "void_p")
+    show_gen_param("internal_pri", "void_p")
 
     print(TWO_TAB + "snd_data = lt_data_t()")
     print(TWO_TAB + "snd_data.from_len_buf(data_len, data_buf)")
@@ -162,7 +162,7 @@ def show_parse_data(func):
     show_parse_param("error_internal", "uint")
     if (func["type"] == "sync"):
         show_parse_param("internal_sync_cond_p", "void_p")
-        show_parse_param("internal_pri", "void_p")
+    show_parse_param("internal_pri", "void_p")
 
     print(THREE_TAB + "return 0, {")
     show_res_dic_item("functype")

@@ -46,7 +46,7 @@ class lt_data_t(object):
 
     def from_bytes(self, _bytes):
         if(len(_bytes) < size_of_ulong()): return
-        self.len = to_unlong(_bytes)
+        self.len = to_ulong(_bytes)
         self.from_len_buf(self.len, _bytes[size_of_ulong():])
 
     def get_buf(self):
@@ -108,7 +108,7 @@ def by_char_p(val):
 def by_data(val):
     return val.get_buf()
 ################################################################################
-def to_unlong(val):
+def to_ulong(val):
     tmp_val = bytes()
     i = 0
     for b in val:
@@ -144,7 +144,7 @@ def to_bool(val):
     return bool.from_bytes(tmp_val, 'little')
 
 def to_void_p(val):
-    return to_unlong(val)
+    return to_ulong(val)
 
 def to_string(val):
     tmp_bytes = bytes()
@@ -164,7 +164,7 @@ def to_data(val):
     return data
 ################################################################################
 
-def from_arg_unlong(arg):
+def from_arg_ulong(arg):
     return int(arg)
 
 def from_arg_uint(arg):
@@ -204,7 +204,7 @@ def from_arg_inoutdata(arg,val_name):
 
 ################################################################################
 #返回一个可以用json.dumps的字典
-def to_screen_unlong(out_dic, val_name):
+def to_screen_ulong(out_dic, val_name):
     return {val_name:out_dic[val_name]}
 
 def to_screen_uint(out_dic, val_name):

@@ -6,7 +6,7 @@
         try:
             self.s.send(snd_data.get_buf())
             len_bytes = self.s.recv(size_of_ulong())
-            data_len = to_unlong(len_bytes)
+            data_len = to_ulong(len_bytes)
             if(data_len > max_rcv_len ):raise
             data_buf = self.s.recv(data_len)
             recv_data = lt_data_t()

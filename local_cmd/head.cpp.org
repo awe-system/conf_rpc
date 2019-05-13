@@ -58,6 +58,11 @@ void session::handle_write(const boost::system::error_code &error)
 
 }
 
+session::~session()
+{
+    socket_.close();
+}
+
 event::event(event_handler *p_event_handler, const std::string & socket_path) :
         _file(),
         _io_service(),

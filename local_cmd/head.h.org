@@ -84,6 +84,8 @@ public:
     void handle_read(const boost::system::error_code &error);
 
     void handle_write(const boost::system::error_code &error);
+
+    virtual ~session();
 };
 
 typedef boost::shared_ptr<session> session_ptr;

@@ -1,6 +1,6 @@
-    ip_port = ('', port)
-
-    s = socket.socket()
+    def __init__(self):
+        self.ip_port = ('', port)
+        self.s = socket.socket()
 
     def snd_rcv(self, snd_data):
         try:

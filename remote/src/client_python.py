@@ -37,8 +37,10 @@ max_rcv_len = 256* 1024*1024
 
 
 class lt_data_t(object):
-    len = 0
-    buf = bytes()
+
+    def __init__(self):
+        self.len = 0
+        self.buf = bytes()
 
     def from_len_buf(self, _len, _buf):
         self.len = _len

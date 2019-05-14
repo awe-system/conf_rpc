@@ -224,13 +224,14 @@ def put_sync_gendata_params(func):
         return str
     return str[:len(str) - 2]
 
-
-def show_response_data(func):
+def get_response_data(func):
+    str = ""
     for param in func["params"]:
         if param["param_type"] != "in":
             if param["param_value"] == "data":
                 p_name = param["param_name"]
-                print ONE_TEB + "lt_data_t " + p_name + "(" + p_name + "_len, " + p_name + "_buf);"
+                str += ONE_TEB + "lt_data_t " + p_name + "(" + p_name + "_len, " + p_name + "_buf);\n"
+    return str
 
 
 def get_gendate_data_len(func):
@@ -300,13 +301,8 @@ def put_async_gendata_params(func):
     for param in func["params"]:
         if param["param_type"] != "in":
             if param["param_value"] == "data":
-                if param["param_type"] != "out":
-                    str += "const "
-                str += "unsigned long "
-                str += param["param_name"] + "_len"
-                str += ", "
-                str += "unsigned char *"
-                str += param["param_name"] + "_buf"
+                str += "lt_data_t "
+                str += param["param_name"]
             else:
                 if param["param_type"] == "in":
                     str += "const "
@@ -355,7 +351,6 @@ def show_async_generate_data_func(func, port):
     print "{"
     print ONE_TEB + func["func_name"] + "_context *context = (" + func["func_name"] + "_context *)" + "server_context;"
     print ONE_TEB + "unsigned int func_type = client_function_callback_type_"+ port+ "_"  + func["func_name"] + ";"
-    show_response_data(func)
     print ONE_TEB + get_async_gendate_data_len(func)
     print ONE_TEB + "data->realloc_buf();"
     print ONE_TEB + "unsigned char *res_buf = data->get_buf();"
@@ -398,12 +393,7 @@ def put_call_async_gendata_params(func):
     str = ""
     for param in func["params"]:
         if param["param_type"] != "in":
-            if param["param_value"] == "data":
-                str += param["param_name"] + "_len"
-                str += ", "
-                str += param["param_name"] + "_buf"
-            else:
-                str += param["param_name"]
+            str += param["param_name"]
             str += ", "
     if len(str) == 0:
         return str
@@ -421,6 +411,7 @@ def show_done():
             str += "{\n"
             str += ONE_TEB + func["func_name"] + "_context *context = (" + func["func_name"] + "_context *) server_context;\n"
             str += ONE_TEB + "lt_session_serv *sess = context->sess;\n"
+            str += get_response_data(func)
             str += ONE_TEB + "int err_internal = service.snd(sess, boost::bind(&server::" + func["func_name"] + "_done_gendata, this, "
             out_str = put_call_async_gendata_params(func)
             if len(out_str) > 0:

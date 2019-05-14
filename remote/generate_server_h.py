@@ -191,13 +191,8 @@ def put_async_gendata_params(func):
     for param in func["params"]:
         if param["param_type"] != "in":
             if param["param_value"] == "data":
-                if param["param_type"] != "out":
-                    str += "const "
-                str += "unsigned long "
-                str += param["param_name"] + "_len"
-                str += ", "
-                str += "unsigned char *"
-                str += param["param_name"] + "_buf"
+                str += "lt_data_t "
+                str += param["param_name"]
             else:
                 if param["param_type"] == "in":
                     str += "const "

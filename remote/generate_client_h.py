@@ -43,7 +43,7 @@ def show_main_head(namespace, classname, withping):
     print "public:"
     print ONE_TEB + classname + "();"
     if (withping):
-        print ONE_TEB + "~" + classname + "();"
+        print ONE_TEB + "virtual ~" + classname + "();"
         print ONE_TEB + "void run();"
     print ONE_TEB + "int connect(const std::string &ip);"
     print ONE_TEB + "void disconnect_async();"

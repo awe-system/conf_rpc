@@ -19,6 +19,7 @@ main_window::main_window(QWidget *parent) :
     ui->setupUi(this);
     ui->comboBox_cli->addItem("C++");
     ui->comboBox_cli->addItem("python");
+    ui->comboBox_cli->addItem("python/C++");
     ui->comboBox_serv->addItem("C++");
     ui->func_list->resizeColumnsToContents();
     ui->func_list->horizontalHeader();
@@ -652,6 +653,10 @@ void main_window::on_generate_clicked()
     else if(ui->comboBox_cli->currentText() == "python")
     {
         cmd += ".py\" ";
+    }
+    else if(ui->comboBox_cli->currentText() == "python/C++")
+    {
+        cmd += cmd += "*.*\" ";
     }
     cmd += ui->cli_path->text() + " \"" + ui->serv_file->text()+ "*.*\" " + ui->server_path->text();
     std::string output;

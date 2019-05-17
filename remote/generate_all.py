@@ -3,27 +3,38 @@ import os
 from sys import argv
 
 
+def gen_cplus(xml):
+    filename = client["filename"] + "_internal"
+    cmd = "python ./generate_client_inter_h.py " + xml + " > ./output/" + filename + ".h"
+    print(cmd)
+    os.system(cmd)
+    cmd = "python ./generate_client_inter_cpp.py " + xml + " > ./output/" + filename + ".cpp"
+    print(cmd)
+    os.system(cmd)
+    filename = client["filename"]
+    cmd = "python ./generate_client_h.py " + xml + " > ./output/" + filename + ".h"
+    print(cmd)
+    os.system(cmd)
+    cmd = "python ./generate_client_cpp.py " + xml + " > ./output/" + filename + ".cpp"
+    print(cmd)
+    os.system(cmd)
+
+def gen_python(xml):
+    filename = client["filename"]
+    cmd = "python ./generate_client_py.py " + xml + " > ./output/" + filename + ".py"
+    print(cmd)
+    os.system(cmd)
+
+
 def gen_client(xml):
     if(client["type"] == "C++"):
-        filename = client["filename"] + "_internal"
-        cmd = "python ./generate_client_inter_h.py " + xml + " > ./output/" + filename + ".h"
-        print(cmd)
-        os.system(cmd)
-        cmd = "python ./generate_client_inter_cpp.py " + xml + " > ./output/" + filename + ".cpp"
-        print(cmd)
-        os.system(cmd)
-        filename = client["filename"]
-        cmd = "python ./generate_client_h.py " + xml + " > ./output/" + filename + ".h"
-        print(cmd)
-        os.system(cmd)
-        cmd = "python ./generate_client_cpp.py " + xml + " > ./output/" + filename + ".cpp"
-        print(cmd)
-        os.system(cmd)
+        gen_cplus(xml)
     elif (client["type"] == "python"):
-        filename = client["filename"]
-        cmd = "python ./generate_client_py.py " + xml + " > ./output/" + filename + ".py"
-        print(cmd)
-        os.system(cmd)
+        gen_python(xml)
+    elif(client["type"] == "python/C++"):
+        gen_python(xml)
+        gen_cplus(xml)
+
 
 def gen_server(xml):
     filename = server["filename"]

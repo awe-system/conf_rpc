@@ -69,10 +69,10 @@ class lt_data_t(object):
 
 ################################################################################
 def size_of_string(val):
-    return len(val) + 1
+    return len(val.encode("utf-8")) + 1
 
 def size_of_char_p(val):
-    return len(val) + 1
+    return len(val.encode("utf-8")) + 1
 
 def size_of_ulong():
     return 8

@@ -120,20 +120,22 @@ def show_client_callback(classname):
     print ONE_TEB + "void handler_by_input(lt_data_t *sent_data, int error_internal) override;\n"
     print "protected:"
     print ONE_TEB + "virtual void disconnected(lt_session *sess) override;"
-    print "};\n"
+    print("};\n")
 
 
 def show_client_head():
-    print "class " + classname + "_client"
-    print "{"
-    print "private:"
-    print ONE_TEB + classname + "_client_callback *cb;"
-    print ONE_TEB + "std::mutex m;"
-    print ONE_TEB + "lt_session_cli_safe *sess;\n"
-    print "public:"
-    print ONE_TEB + classname + "_client(" + classname + "_client_callback *_cb);\n"
-    print ONE_TEB + "int connect(const std::string &ip);\n"
-    print ONE_TEB + "void disconnect();\n"
+    print("class " + classname + "_client")
+    print ("{")
+    print("private:")
+    print(ONE_TEB + classname + "_client_callback *cb;")
+    print(ONE_TEB + "std::mutex m;")
+    print(ONE_TEB + "lt_session_cli_safe *sess;\n")
+    print("public:")
+    print(
+        ONE_TEB + classname + "_client(" + classname + "_client_callback *_cb);\n")
+    print(ONE_TEB + "int connect(const std::string &ip);\n")
+    print(ONE_TEB + "void disconnect();\n")
+    print(ONE_TEB + " void *get_sess(){ return sess;}\n")
 
 
 def client_func_params(func):

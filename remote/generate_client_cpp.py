@@ -34,7 +34,7 @@ def show_handler_head(classname):
     print "{"
     print "private:"
     print ONE_TEB + "std::mutex              connected_list_m;"
-    print ONE_TEB + "std::list<"+classname+" *> connected_list;"
+    print ONE_TEB + "std::map<void * ,"+classname+" *> connected_list;"
     print "public:"
 
 
@@ -86,22 +86,17 @@ def show_callbacks(funcs):
 
 
 def show_static_callbacks(classname):
-    print ONE_TEB + "void addcli_to_event("+classname+" *cli)"
+    print ONE_TEB + "void addcli_to_event(void *sess,"+classname+" *cli)"
     print ONE_TEB + "{"
     print TWO_TEB + "std::unique_lock<std::mutex> lck(connected_list_m);"
-    print TWO_TEB + "connected_list.push_back(cli);"
+    print TWO_TEB + "connected_list[sess] = cli;"
     print ONE_TEB + "}\n"
     print ONE_TEB + "void disconnected(lt_session *sess) override"
     print ONE_TEB + "{"
     print TWO_TEB + "std::unique_lock<std::mutex> lck(connected_list_m);"
-    print TWO_TEB + "std::list<"+classname+" *>      org_connected_list = connected_list;"
-    print TWO_TEB + "connected_list.clear();"
-    print TWO_TEB + "while ( !org_connected_list.empty() )"
-    print TWO_TEB + "{"
-    print THREE_TEB + classname+" *cli = org_connected_list.front();"
-    print THREE_TEB + "org_connected_list.pop_front();"
-    print THREE_TEB + "cli->disconnected_internal();"
-    print TWO_TEB + "}"
+    print TWO_TEB + classname+" *cli = connected_list[sess];"
+    print TWO_TEB + "connected_list.erase((void *)sess);"
+    print TWO_TEB + "cli->disconnected_internal();"
     print ONE_TEB + "}\n"
 
 
@@ -174,7 +169,7 @@ def show_connect(classname):
     print ONE_TEB + "int err = cli.connect(ip);"
     print ONE_TEB + "if ( !err )"
     print ONE_TEB + "{"
-    print TWO_TEB + "handler.addcli_to_event(this);"
+    print TWO_TEB + "handler.addcli_to_event(cli.get_sess(), this);"
     print TWO_TEB + "is_now_connected = true;"
     print ONE_TEB + "}"
     print ONE_TEB + "return err;"

@@ -64,7 +64,7 @@ class lt_data_t(object):
 
     def write_to_file(self, fname):
         with open(fname, 'wb') as file_object:
-            file_object.write(self.buf)
+            file_object.write(self.buf[:self.len])
             file_object.close()
 
 ################################################################################

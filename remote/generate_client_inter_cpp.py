@@ -587,6 +587,15 @@ def show_by_input():
 def show_disconnected():
     print "void " + classname + "_client_callback::disconnected(lt_session *sess)"
     print "{"
+    print ONE_TEB + "pool.submit_task(boost::bind("
+    print TWO_TEB + "&ColdNodeCommClient_client_callback::disconnected_inthread, this,"
+    print TWO_TEB + "sess));"
+    print "}"
+    print ""
+
+def show_disconnected_inthread():
+    print "void " + classname + "_client_callback::disconnected_inthread(lt_session *sess)"
+    print "{"
     print ONE_TEB + "lt_client_service::disconnected(sess);"
     print ONE_TEB + "cb_handler->disconnected(sess);"
     print "}"
@@ -597,6 +606,7 @@ def show_client_callback():
     show_by_output()
     show_by_input()
     show_disconnected()
+    show_disconnected_inthread()
 
 
 def show_end():

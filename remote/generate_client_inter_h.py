@@ -50,7 +50,8 @@ def show_include(namespace):
     str += "#include <lt_client_service.h>\n"
     str += "#include <lt_session_cli_set.h>\n"
     str += "#include <lt_data_translator.h>\n"
-    str += "#include <lt_condition.h>\n\n"
+    str += "#include <lt_condition.h>\n"
+    str += "#include <thread_pool.hpp>\n\n"
     str += "#ifndef IN\n#define IN\n#endif\n\n" \
            "#ifndef OUT\n#define OUT\n#endif\n\n" \
            "#ifndef INOUT\n#define INOUT\n#endif\n\n"
@@ -113,8 +114,10 @@ def show_client_callback(classname):
     print "private:"
     print ONE_TEB + classname + "_callback_handler *cb_handler;"
     print ONE_TEB + "lt_thread_server server;\n"
+    print ONE_TEB + "data_channel::thread_pool pool;\n"
     print "public:"
     print ONE_TEB + classname + "_client_callback(int thread_num, " + classname + "_callback_handler *cb_handler);\n"
+    print ONE_TEB + "void disconnected_inthread(lt_session *sess);\n"
     print "private:"
     print ONE_TEB + "void handler_by_output(lt_data_t *received_data) override;\n"
     print ONE_TEB + "void handler_by_input(lt_data_t *sent_data, int error_internal) override;\n"

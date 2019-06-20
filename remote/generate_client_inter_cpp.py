@@ -117,7 +117,6 @@ def show_client_common():
     show_get_put_ses_ref()
 
 
-
 def generate_param(param):
     str = type_tab[param["param_type"]] + BLANK
     if param["param_value"] == "data":
@@ -407,7 +406,7 @@ def show_client_gendata():
 
 def show_client_callback_head():
     print classname + "_client_callback::" + classname + "_client_callback(int thread_num," \
-        " " + classname + "_callback_handler *cb_handler) :"
+                                                         " " + classname + "_callback_handler *cb_handler) :"
     print commands.getoutput("cat ./src/client_callback_head")
 
 
@@ -533,7 +532,6 @@ def show_skip_buf(func):
                     "param_value"] + "(buf);"
 
 
-
 def show_by_input_cases():
     for func in funcs:
         print TWO_TEB + "case server_function_callback_type_" + port + "_" + \
@@ -561,8 +559,9 @@ def show_by_input_cases():
                 elif param["param_type"] == "inout":
                     print THREE_TEB + param_declare_tab[
                         param["param_value"]] + BLANK + param[
-                              "param_name"] + " = lt_data_translator::to_" + param[
-                        "param_value"] + "(buf);"
+                              "param_name"] + " = lt_data_translator::to_" + \
+                          param[
+                              "param_value"] + "(buf);"
 
             print THREE_TEB + "void * internal_pri = lt_data_translator::to_void_p(buf);"
             show_async_callback(func)
@@ -584,14 +583,16 @@ def show_by_input():
     print "}"
     print ""
 
+
 def show_disconnected():
     print "void " + classname + "_client_callback::disconnected(lt_session *sess)"
     print "{"
     print ONE_TEB + "pool.submit_task(boost::bind("
-    print TWO_TEB + "&ColdNodeCommClient_client_callback::disconnected_inthread, this,"
+    print TWO_TEB + "&" + classname + "_client_callback::disconnected_inthread, this,"
     print TWO_TEB + "sess));"
     print "}"
     print ""
+
 
 def show_disconnected_inthread():
     print "void " + classname + "_client_callback::disconnected_inthread(lt_session *sess)"
@@ -600,6 +601,7 @@ def show_disconnected_inthread():
     print ONE_TEB + "cb_handler->disconnected(sess);"
     print "}"
     print ""
+
 
 def show_client_callback():
     show_client_callback_head()

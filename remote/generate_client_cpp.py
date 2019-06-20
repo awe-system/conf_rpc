@@ -200,6 +200,7 @@ def show_withping(classname, withping):
         print TWO_TEB + "{"
         print THREE_TEB + "break;"
         print TWO_TEB + "}"
+        print TWO_TEB + "lck.unlock();"
         print TWO_TEB + "sleep(min(DEFAULT_WAIT_SECONDS/3,3));"
         print ONE_TEB + "}"
         print "}\n"

@@ -57,6 +57,26 @@ def show_port(port):
     print "#define SERVER_PORT    " + str(port) + "\n"
 
 
+def show_get_put_ses_ref():
+    print "void " + classname + "_client::get_sess_ref()"
+    print "{"
+    print ONE_TEB + " std::lock_guard < std::mutex > lck(m);"
+    print ONE_TEB + "auto new_sess = cb->get_session(_ip);"
+    print ONE_TEB + "assert(sess == new_sess);"
+    print "}"
+    print ""
+    print "void " + classname + "_client::put_sess_ref()"
+    print "{"
+    print ONE_TEB + " std::lock_guard < std::mutex > lck(m);"
+    print ONE_TEB + "bool is_destroy = cb->put_session(sess);"
+    print ONE_TEB + "if(is_destroy)"
+    print ONE_TEB + "{"
+    print TWO_TEB + "sess = NULL;"
+    print ONE_TEB + "}"
+    print "}"
+    print ""
+
+
 def show_client_common():
     print commands.getoutput("cat ./src/client_cpp_body")
     print classname + "_client::" + classname + "_client(" + classname + "_client_callback *_cb) : cb(_cb), sess(NULL)"
@@ -74,6 +94,7 @@ def show_client_common():
     print ONE_TEB + "try"
     print ONE_TEB + "{"
     print TWO_TEB + "sess->connect(ip, SERVER_PORT);"
+    print TWO_TEB + "_ip = ip;"
     print ONE_TEB + "} catch (...)"
     print ONE_TEB + "{"
     print TWO_TEB + "return -RPC_ERROR_TYPE_CONNECT_FAIL;"
@@ -86,9 +107,15 @@ def show_client_common():
     print ONE_TEB + " std::lock_guard < std::mutex > lck(m);"
     print ONE_TEB + "if (!sess) return;"
     print ONE_TEB + "sess->disconnect();"
-    print ONE_TEB + "cb->put_session(sess);"
-    print ONE_TEB + "sess = NULL;"
+    print ONE_TEB + "bool is_destroy = cb->put_session(sess);"
+    print ONE_TEB + "if(is_destroy)"
+    print ONE_TEB + "{"
+    print TWO_TEB + "sess = NULL;"
+    print ONE_TEB + "}"
     print "}"
+    print ""
+    show_get_put_ses_ref()
+
 
 
 def generate_param(param):

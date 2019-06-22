@@ -34,20 +34,50 @@ def show_handler_head(classname):
     print "{"
     print "private:"
     print ONE_TEB + "std::mutex              connected_list_m;"
-    print ONE_TEB + "std::map<void * ,"+classname+" *> connected_list;"
+    print ONE_TEB + "std::map<void * ," + classname + " *> connected_list;"
+    print ONE_TEB + "data_channel::thread_pool pool;"
     print "public:"
+    print ONE_TEB + classname + "_thread_handler():pool(1){};\n"
 
 
 def show_handler_end():
     print "};\n"
 
 
-def show_callback_head(func):
+def show_callback_direct_head(func):
+    print "\n" + ONE_TEB + gfs.client_inter_cb_direct_head(func) + ""
+    print ONE_TEB + "{"
+
+
+def gen_inthread_header(func):
+    str = "void "
+    str += func["func_name"] + "_callback_inthread("
+    for param in func["params"]:
+        if param["param_type"] != "in":
+            if (param["param_value"] == "data"):
+                str += "lt_data_t * " + param["param_name"]
+            elif(param["param_value"] == "string"):
+                str += "string * " + param["param_name"]
+            elif(param["param_value"] == "char_p"):
+                str += "char * " + param["param_name"]
+            else:
+                str += gfs.param_tab[param["param_value"]] + " " + param["param_name"]
+            str += ','
+    str += "void *&internal_pri,"
+    str += "int error_internal)"
+    return str
+
+def show_callback_inthread_head(func):
+    print "\n" + ONE_TEB + gen_inthread_header(func)
+    print ONE_TEB + "{"
+
+
+def show_callback_func_head(func):
     print "\n" + ONE_TEB + gfs.client_inter_cb_head(func) + " override"
     print ONE_TEB + "{"
 
 
-def show_callback_end():
+def show_callback_func_end():
     print ONE_TEB + "}"
 
 
@@ -70,13 +100,123 @@ def show_sync_callback(func):
         print TWO_TEB + "_internal_sync_cond->notify();"
 
 
-def show_callback(func):
-    show_callback_head(func)
+def gen_call_cb_direct(func):
+    str = func["func_name"] + "_callback_direct("
+    for param in func["params"]:
+        if (param["param_type"] == "out" or param["param_type"] == "inout"):
+            str += gfs.generate_func_value(param)
+            str += ", "
+    str += "internal_pri, "
+    str += "error_internal);"
+    return str
+
+def gen_post(func):
+    str = "pool.submit_task(boost::bind(&" + classname + "_thread_handler::"
+    str += func["func_name"] + "_callback_inthread, this,"
+    for param in func["params"]:
+        if (param["param_type"] == "out" or param["param_type"] == "inout"):
+            if ((param["param_value"] == "data") or
+                    (param["param_value"] == "string") or
+                    (param["param_value"] == "char_p")):
+                str += "___new_" + param["param_name"]
+            else:
+                str += param["param_name"]
+            str += ", "
+    str += "internal_pri, "
+    str += "error_internal));"
+    return str
+
+def show_cb_new_data(func):
+    for param in func["params"]:
+        if (param["param_type"] == "out" or param["param_type"] == "inout"):
+            if (param["param_value"] == "data"):
+                print THREE_TEB + "lt_data_t * ___new_" + param[
+                    "param_name"] + " = new lt_data_t(" + param[
+                          "param_name"] + "_len);"
+                print THREE_TEB + "assert("+param[
+                    "param_name"] + "_len != 0);"
+                print THREE_TEB + "memcpy(___new_" + param[
+                    "param_name"] + "->get_buf(), " + param[
+                          "param_name"] + "_buf, " + param[
+                          "param_name"] + "_len);"
+            elif (param["param_value"] == "string"):
+                print THREE_TEB + "string * ___new_" + param[
+                    "param_name"] + " = new string();"
+                print THREE_TEB + "*___new_" + param[
+                    "param_name"] + " = " + param[
+                          "param_name"] + ";"
+            elif (param["param_value"] == "char_p"):
+                print THREE_TEB + "char * ___new_" + param[
+                    "param_name"] + " = new char[strlen(" + param[
+                          "param_name"] + ")];"
+                print THREE_TEB + "memset(___new_" + param[
+                    "param_name"] + ", 0 , strlen(" + param[
+                          "param_name"] + ");"
+                print THREE_TEB + "memcpy(___new_" + param[
+                    "param_name"] + ", " + param[
+                          "param_name"] + " , strlen(" + param[
+                          "param_name"] + ");"
+
+
+def show_callback_func(func):
+    show_callback_func_head(func)
+    print TWO_TEB + "if(!error_internal)"
+    print TWO_TEB + "{"
+    print THREE_TEB + gen_call_cb_direct(func)
+    print TWO_TEB + "}"
+    print TWO_TEB + "else"
+    print TWO_TEB + "{"
+    show_cb_new_data(func)
+    print THREE_TEB + gen_post(func)
+    print TWO_TEB + "}"
+    show_callback_func_end()
+
+
+def show_callback_direct(func):
+    show_callback_direct_head(func)
     if (func["subtype"] == "sync"):
         show_sync_callback(func)
     else:
         show_async_callback(func)
-    show_callback_end()
+    show_callback_func_end()
+
+def gen_call_direct(func):
+    str = func["func_name"] + "_callback_direct("
+    for param in func["params"]:
+        if param["param_type"] != "in":
+            if (param["param_value"] == "data"):
+                str += param["param_name"] + "->_length, "
+                str += param["param_name"] + "->get_buf()"
+            elif(param["param_value"] == "string"):
+                str += "*" + param["param_name"]
+            # elif(param["param_value"] == "char_p"):
+            #     str += param["param_name"]
+            else:
+                str += param["param_name"]
+            str += ', '
+
+    str += "internal_pri, "
+    str += "error_internal);\n"
+    return str
+
+
+def show_callback_inthread(func):
+    show_callback_inthread_head(func)
+    print TWO_TEB + gen_call_direct(func)
+    for param in func["params"]:
+        if param["param_type"] != "in":
+            if ((param["param_value"] == "data") or
+                    (param["param_value"] == "string") or
+                    (param["param_value"] == "char_p")):
+                print TWO_TEB + "delete " + param["param_name"] + ";"
+
+    show_callback_func_end()
+
+
+def show_callback(func):
+    show_callback_func(func)
+    show_callback_direct(func)
+    show_callback_inthread(func)
 
 
 def show_callbacks(funcs):
@@ -86,7 +226,7 @@ def show_callbacks(funcs):
 
 
 def show_static_callbacks(classname):
-    print ONE_TEB + "void addcli_to_event(void *sess,"+classname+" *cli)"
+    print ONE_TEB + "void addcli_to_event(void *sess," + classname + " *cli)"
     print ONE_TEB + "{"
     print TWO_TEB + "std::unique_lock<std::mutex> lck(connected_list_m);"
     print TWO_TEB + "connected_list[sess] = cli;"
@@ -94,7 +234,7 @@ def show_static_callbacks(classname):
     print ONE_TEB + "void disconnected(lt_session *sess) override"
     print ONE_TEB + "{"
     print TWO_TEB + "std::unique_lock<std::mutex> lck(connected_list_m);"
-    print TWO_TEB + classname+" *cli = connected_list[sess];"
+    print TWO_TEB + classname + " *cli = connected_list[sess];"
     print TWO_TEB + "connected_list.erase((void *)sess);"
     print TWO_TEB + "cli->disconnected_internal();"
     print ONE_TEB + "}\n"

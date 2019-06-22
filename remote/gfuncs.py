@@ -219,6 +219,13 @@ def client_cb_head(func):
     str += "int error_internal)"
     return str
 
+def client_inter_cb_direct_head(func):
+    str = "void "
+    str += func["func_name"] + "_callback_direct("
+    str += generate_async_cb_param_doma_end(func["params"])
+    str += "INOUT void *&internal_pri, "
+    str += "OUT int error_internal)"
+    return str
 
 def client_inter_cb_head(func):
     str = "void "

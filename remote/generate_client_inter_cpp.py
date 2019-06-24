@@ -553,9 +553,14 @@ def show_by_input_cases():
                           "param_value"] + "(buf);"
             for param in func["params"]:
                 if param["param_type"] == "out":
-                    print THREE_TEB + param_declare_tab[
-                        param["param_value"]] + BLANK + param[
-                              "param_name"] + ";"
+                    if param["param_value"] == "data":
+                        print THREE_TEB + param_declare_tab[
+                            param["param_value"]] + BLANK + param[
+                                  "param_name"] + "(1);"
+                    else:
+                        print THREE_TEB + param_declare_tab[
+                            param["param_value"]] + BLANK + param[
+                                  "param_name"] + ";"
                 elif param["param_type"] == "inout":
                     print THREE_TEB + param_declare_tab[
                         param["param_value"]] + BLANK + param[

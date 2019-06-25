@@ -358,7 +358,7 @@ def show_gendata_log():
     print ONE_TEB + "__sync_add_and_fetch(&cb->gendata_ref_cnt, 1);"
     print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate gendata\","
     print TWO_TEB + "\"before snd sess [%p] cb [%p] nosession_cnt [%lld] snd_ref_cnt [%lld] \\n\""
-    print TWO_TEB + "\"gendata_ref_cnt [%lld] disconn_cnt [%lld] cb_cnt [%lld]\""
+    print TWO_TEB + "\"gendata_ref_cnt [%lld]  cb_cnt [%lld]\""
     print TWO_TEB + "\"cb_error_cnt [%lld] cb_normal_cnt [%lld] func_type [%u]\","
     print TWO_TEB + "sess, cb, cb->nosession_cnt, cb->snd_ref_cnt, cb->gendata_ref_cnt, cb->cb_cnt,"
     print TWO_TEB + "cb->cb_error_cnt, cb->cb_normal_cnt, func_type);"

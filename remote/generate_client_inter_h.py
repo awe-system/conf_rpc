@@ -115,6 +115,17 @@ def show_client_callback(classname):
     print ONE_TEB + classname + "_callback_handler *cb_handler;"
     print ONE_TEB + "lt_thread_server server;\n"
     print ONE_TEB + "data_channel::thread_pool pool;\n"
+    print "public:\n"
+    print ONE_TEB + "long long disconnected_cnt = 0;"
+    print ONE_TEB + "long long disconninthread_cnt = 0;"
+    print ONE_TEB + "long long cb_cnt = 0;"
+    print ONE_TEB + "long long cb_error_cnt = 0;"
+    print ONE_TEB + "long long cb_normal_cnt = 0;"
+    print(ONE_TEB + "long long snd_ref_cnt = 0;")
+    print(ONE_TEB + "long long gendata_ref_cnt = 0;")
+    print(ONE_TEB + "long long nosession_cnt = 0;")
+    print(ONE_TEB + "long long connect_cnt = 0;")
+    print(ONE_TEB + "long long disconn_cnt = 0;\n")
     print "public:"
     print ONE_TEB + classname + "_client_callback(int thread_num, " + classname + "_callback_handler *cb_handler);\n"
     print ONE_TEB + "void disconnected_inthread(lt_session *sess);\n"

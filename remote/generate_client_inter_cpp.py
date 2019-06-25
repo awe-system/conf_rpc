@@ -48,7 +48,8 @@ def help(arg):
 
 
 def show_include(namespace, filename):
-    print "#include \"" + filename + ".h\"\n"
+    print "#include \"" + filename + ".h\""
+    print "#include <awe_log.h>\n"
     print "namespace " + namespace
     print "{\n"
 
@@ -84,7 +85,11 @@ def show_client_common():
     print ""
     print "int " + classname + "_client::connect(const std::string &ip)"
     print "{"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"connect before mutex ip [%s] cb [%p]\","
+    print TWO_TEB + "ip.c_str(), cb);"
     print ONE_TEB + "std::lock_guard<std::mutex> lck(m);"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"connect after mutex ip [%s] cb [%p]\","
+    print TWO_TEB + "ip.c_str(), cb);"
     print ONE_TEB + "if ( !sess )"
     print ONE_TEB + "{"
     print TWO_TEB + "sess = cb->get_session(ip);"
@@ -93,7 +98,10 @@ def show_client_common():
     print ONE_TEB + "}"
     print ONE_TEB + "try"
     print ONE_TEB + "{"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"before [%p]->connect(%s) cb [%p]\",sess, ip.c_str(), cb);"
     print TWO_TEB + "sess->connect(ip, SERVER_PORT);"
+    print ONE_TEB + "__sync_add_and_fetch(&cb->connect_cnt, 1);"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"after [%p]->connect(%s) cb [%p] \\nconnect_cnt [%lld] disconn_cnt [%lld]\", sess, ip.c_str(),cb->connect_cnt, cb->disconn_cnt);"
     print TWO_TEB + "_ip = ip;"
     print ONE_TEB + "} catch (...)"
     print ONE_TEB + "{"
@@ -104,9 +112,13 @@ def show_client_common():
     print ""
     print "void " + classname + "_client::disconnect()"
     print "{"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"disconnect before mutex ip [%s] cb [%p]\",_ip.c_str(), cb);"
     print ONE_TEB + " std::lock_guard < std::mutex > lck(m);"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"disconnect after mutex ip [%s] cb [%p]\",_ip.c_str(), cb);"
     print ONE_TEB + "if (!sess) return;"
     print ONE_TEB + "sess->disconnect();"
+    print ONE_TEB + "__sync_add_and_fetch(&cb->disconn_cnt, 1);"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"after [%p]->disconnect cb [%p] \\nconnect_cnt [%lld] disconn_cnt [%lld]\",sess, cb, cb->connect_cnt, cb->disconn_cnt);"
     print ONE_TEB + "bool is_destroy = cb->put_session(sess);"
     print ONE_TEB + "if(is_destroy)"
     print ONE_TEB + "{"
@@ -200,9 +212,35 @@ def show_sync_to_buf(func):
                           "param_value"] + "(buf);"
 
 
+def show_notsession_check():
+    print ONE_TEB + "if ( !sess )"
+    print ONE_TEB + "{"
+    print TWO_TEB + "__sync_add_and_fetch(&cb->nosession_cnt, 1);"
+    print TWO_TEB + "AWE_MODULE_DEBUG(\"communicate snd\","
+    print THREE_TEB + "\"!sess cb [%p] nosession_cnt [%lld] snd_ref_cnt [%lld] \\n\""
+    print THREE_TEB + "\"gendata_ref_cnt [%lld]  cb_cnt [%lld]\\n\""
+    print THREE_TEB + "\"cb_error_cnt [%lld] cb_normal_cnt [%lld]\","
+    print THREE_TEB + "cb, cb->nosession_cnt, cb->snd_ref_cnt, cb->gendata_ref_cnt, cb->cb_cnt,"
+    print THREE_TEB + "cb->cb_error_cnt, cb->cb_normal_cnt);"
+    print TWO_TEB + "return -RPC_ERROR_TYPE_CONNECT_FAIL;"
+    print ONE_TEB + "}"
+
+
+def show_before_snd():
+    print ONE_TEB + "__sync_add_and_fetch(&cb->snd_ref_cnt, 1);"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate snd\","
+    print TWO_TEB + "\"before snd sess [%p] cb [%p] nosession_cnt [%lld] snd_ref_cnt [%lld] \\n\""
+    print TWO_TEB + "\"gendata_ref_cnt [%lld]  cb_cnt [%lld]\\n\""
+    print TWO_TEB + "\"cb_error_cnt [%lld] cb_normal_cnt [%lld]\","
+    print TWO_TEB + "sess, cb, cb->nosession_cnt, cb->snd_ref_cnt, cb->gendata_ref_cnt, cb->cb_cnt,"
+    print TWO_TEB + "cb->cb_error_cnt, cb->cb_normal_cnt);"
+
+
 def show_sync_client_func(func):
+    show_notsession_check()
     print ONE_TEB + "int error_internal = 0;"
     print ONE_TEB + "lt_condition _internal_sync_cond;"
+    show_before_snd()
     print ONE_TEB + "cb->snd(sess, boost::bind(&" + classname + "_client::" + \
           func[
               "func_name"] + "_gendata, this, " + put_sync_gendata_params_no_def(
@@ -232,8 +270,8 @@ def put_async_gendata_params_no_def(func):
 
 
 def show_async_client_func(func):
-    print ONE_TEB + "if ( !sess )"
-    print TWO_TEB + "return -RPC_ERROR_TYPE_CONNECT_FAIL;"
+    show_notsession_check()
+    show_before_snd()
     print ONE_TEB + "return cb->snd(sess, boost::bind(&" + classname + "_client::" + \
           func[
               "func_name"] + "_gendata, this, " + put_async_gendata_params_no_def(
@@ -316,12 +354,22 @@ def show_by_buf(func):
         print ONE_TEB + "return 0;"
 
 
+def show_gendata_log():
+    print ONE_TEB + "__sync_add_and_fetch(&cb->gendata_ref_cnt, 1);"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate gendata\","
+    print TWO_TEB + "\"before snd sess [%p] cb [%p] nosession_cnt [%lld] snd_ref_cnt [%lld] \\n\""
+    print TWO_TEB + "\"gendata_ref_cnt [%lld] disconn_cnt [%lld] cb_cnt [%lld]\""
+    print TWO_TEB + "\"cb_error_cnt [%lld] cb_normal_cnt [%lld] func_type [%u]\","
+    print TWO_TEB + "sess, cb, cb->nosession_cnt, cb->snd_ref_cnt, cb->gendata_ref_cnt, cb->cb_cnt,"
+    print TWO_TEB + "cb->cb_error_cnt, cb->cb_normal_cnt, func_type);"
+
+
 def show_sync_generate_data_func(func):
     show_sync_generate_data_func_def(func)
     print "{"
     print ONE_TEB + "unsigned int func_type = server_function_callback_type_" + \
           port + "_" + func["func_name"] + ";"
-
+    show_gendata_log()
     for param in func["params"]:
         if param["param_value"] == "data":
             p_name = param["param_name"]
@@ -388,6 +436,7 @@ def show_async_generate_data_func(func):
     print "{"
     print ONE_TEB + "unsigned int func_type = server_function_callback_type_" + \
           port + "_" + func["func_name"] + ";"
+    show_gendata_log()
     show_request_data(func)
     print ONE_TEB + get_async_gendate_data_len(func)
     print ONE_TEB + "data->realloc_buf();"
@@ -490,17 +539,34 @@ def show_async_callback(func):
         func) + "internal_pri, error_internal);"
 
 
+def show_byoutout_startlog():
+    print TWO_TEB + "__sync_add_and_fetch(&cb_normal_cnt, 1);"
+    print TWO_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
+    print TWO_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
+    print THREE_TEB + "\"normal start cb_normal_cnt [%lld] cb_cnt [%lld] this [%p] snd_ref_cnt [%lld] gendata_ref_cnt [%lld] \\n\","
+    print THREE_TEB + "cb_normal_cnt, cb_cnt, this,snd_ref_cnt,gendata_ref_cnt);"
+
+
+def show_byoutout_endlog():
+    print TWO_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
+    print THREE_TEB + "\"normal end cb_normal_cnt [%lld] cb_cnt [%lld] this [%p] snd_ref_cnt [%lld] gendata_ref_cnt [%lld]\\n\","
+    print THREE_TEB + "cb_normal_cnt, cb_cnt, this,snd_ref_cnt,gendata_ref_cnt);"
+
+
 def show_by_output_cases():
     for func in funcs:
         print TWO_TEB + "case client_function_callback_type_" + port + "_" + \
               func[
                   "func_name"] + ":"
         print TWO_TEB + "{"
+        show_byoutout_startlog()
+
         show_to_buf(func)
         if func["type"] == "sync":
             show_sync_notify(func)
         else:
             show_async_callback(func)
+        show_byoutout_endlog()
         print TWO_TEB + "}"
         print THREE_TEB + "break;"
 
@@ -532,12 +598,29 @@ def show_skip_buf(func):
                     "param_value"] + "(buf);"
 
 
+def show_byinput_starlog():
+    print TWO_TEB + "__sync_add_and_fetch(&cb_error_cnt, 1);"
+    print TWO_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
+    print TWO_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
+    print THREE_TEB + "\"Err start cb_normal_cnt [%lld] cb_cnt [%lld] err_internal [%d]\\n\""
+    print THREE_TEB + "\"this [%p]\","
+    print THREE_TEB + "cb_normal_cnt, cb_cnt, error_internal, this);"
+
+
+def show_byinput_endlog():
+    print TWO_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
+    print THREE_TEB + "\"Err end cb_normal_cnt [%lld] cb_cnt [%lld] err_internal [%d]\\n\""
+    print THREE_TEB + "\"this [%p]\","
+    print THREE_TEB + "cb_normal_cnt, cb_cnt, error_internal, this);"
+
+
 def show_by_input_cases():
     for func in funcs:
         print TWO_TEB + "case server_function_callback_type_" + port + "_" + \
               func[
                   "func_name"] + ":"
         print TWO_TEB + "{"
+        show_byinput_starlog()
         show_skip_buf(func)
         if func["type"] == "sync":
             print THREE_TEB + "void *internal_sync_cond_p = lt_data_translator::to_void_p(buf);"
@@ -570,6 +653,7 @@ def show_by_input_cases():
 
             print THREE_TEB + "void * internal_pri = lt_data_translator::to_void_p(buf);"
             show_async_callback(func)
+            show_byinput_endlog()
         print TWO_TEB + "}"
         print THREE_TEB + "break;"
 

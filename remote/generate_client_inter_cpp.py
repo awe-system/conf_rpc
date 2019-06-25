@@ -540,17 +540,17 @@ def show_async_callback(func):
 
 
 def show_byoutout_startlog():
-    print TWO_TEB + "__sync_add_and_fetch(&cb_normal_cnt, 1);"
-    print TWO_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
-    print TWO_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
-    print THREE_TEB + "\"normal start cb_normal_cnt [%lld] cb_cnt [%lld] this [%p] snd_ref_cnt [%lld] gendata_ref_cnt [%lld] \\n\","
-    print THREE_TEB + "cb_normal_cnt, cb_cnt, this,snd_ref_cnt,gendata_ref_cnt);"
+    print THREE_TEB + "__sync_add_and_fetch(&cb_normal_cnt, 1);"
+    print THREE_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
+    print THREE_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
+    print THREE_TEB + ONE_TEB + "\"normal start cb_normal_cnt [%lld] cb_cnt [%lld] this [%p] snd_ref_cnt [%lld] gendata_ref_cnt [%lld] \\n\","
+    print THREE_TEB + ONE_TEB+ "cb_normal_cnt, cb_cnt, this,snd_ref_cnt,gendata_ref_cnt);"
 
 
 def show_byoutout_endlog():
-    print TWO_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
-    print THREE_TEB + "\"normal end cb_normal_cnt [%lld] cb_cnt [%lld] this [%p] snd_ref_cnt [%lld] gendata_ref_cnt [%lld]\\n\","
-    print THREE_TEB + "cb_normal_cnt, cb_cnt, this,snd_ref_cnt,gendata_ref_cnt);"
+    print THREE_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
+    print THREE_TEB + ONE_TEB + "\"normal end cb_normal_cnt [%lld] cb_cnt [%lld] this [%p] snd_ref_cnt [%lld] gendata_ref_cnt [%lld]\\n\","
+    print THREE_TEB + ONE_TEB + "cb_normal_cnt, cb_cnt, this,snd_ref_cnt,gendata_ref_cnt);"
 
 
 def show_by_output_cases():
@@ -599,19 +599,19 @@ def show_skip_buf(func):
 
 
 def show_byinput_starlog():
-    print TWO_TEB + "__sync_add_and_fetch(&cb_error_cnt, 1);"
-    print TWO_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
-    print TWO_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
-    print THREE_TEB + "\"Err start cb_normal_cnt [%lld] cb_cnt [%lld] err_internal [%d]\\n\""
-    print THREE_TEB + "\"this [%p]\","
-    print THREE_TEB + "cb_normal_cnt, cb_cnt, error_internal, this);"
+    print THREE_TEB + "__sync_add_and_fetch(&cb_error_cnt, 1);"
+    print THREE_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
+    print THREE_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
+    print THREE_TEB + ONE_TEB + "\"Err start cb_normal_cnt [%lld] cb_cnt [%lld] err_internal [%d]\\n\""
+    print THREE_TEB + ONE_TEB + "\"this [%p]\","
+    print THREE_TEB + ONE_TEB + "cb_normal_cnt, cb_cnt, error_internal, this);"
 
 
 def show_byinput_endlog():
-    print TWO_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
-    print THREE_TEB + "\"Err end cb_normal_cnt [%lld] cb_cnt [%lld] err_internal [%d]\\n\""
-    print THREE_TEB + "\"this [%p]\","
-    print THREE_TEB + "cb_normal_cnt, cb_cnt, error_internal, this);"
+    print THREE_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
+    print THREE_TEB + ONE_TEB + "\"Err end cb_normal_cnt [%lld] cb_cnt [%lld] err_internal [%d]\\n\""
+    print THREE_TEB + ONE_TEB + "\"this [%p]\","
+    print THREE_TEB + ONE_TEB + "cb_normal_cnt, cb_cnt, error_internal, this);"
 
 
 def show_by_input_cases():

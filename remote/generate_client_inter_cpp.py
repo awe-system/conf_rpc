@@ -676,6 +676,10 @@ def show_by_input():
 def show_disconnected():
     print "void " + classname + "_client_callback::disconnected(lt_session *sess)"
     print "{"
+    print ONE_TEB + "__sync_add_and_fetch(&disconnected_cnt, 1);"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
+    print TWO_TEB + "\"connect_cnt [%lld] disconn_cnt [%lld] disconnected [%lld] disconninthread_cnt [%lld] sess [%p] this [%p]\\n\","
+    print TWO_TEB + "connect_cnt, disconn_cnt, disconnected_cnt, disconninthread_cnt, sess, this);"
     print ONE_TEB + "pool.submit_task(boost::bind("
     print TWO_TEB + "&" + classname + "_client_callback::disconnected_inthread, this,"
     print TWO_TEB + "sess));"
@@ -686,8 +690,15 @@ def show_disconnected():
 def show_disconnected_inthread():
     print "void " + classname + "_client_callback::disconnected_inthread(lt_session *sess)"
     print "{"
+    print ONE_TEB + "__sync_add_and_fetch(&disconninthread_cnt, 1);"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
+    print TWO_TEB + "\"connect_cnt [%lld] disconn_cnt [%lld] disconnected [%lld] disconninthread_cnt [%lld] sess [%p] this [%p]\\n\","
+    print TWO_TEB + "connect_cnt, disconn_cnt, disconnected_cnt, disconninthread_cnt, sess, this);"
     print ONE_TEB + "lt_client_service::disconnected(sess);"
     print ONE_TEB + "cb_handler->disconnected(sess);"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
+    print TWO_TEB + "\"connect_cnt [%lld] disconn_cnt [%lld] disconnected [%lld] disconninthread_cnt [%lld] sess [%p] this [%p]\\n\","
+    print TWO_TEB + "connect_cnt, disconn_cnt, disconnected_cnt, disconninthread_cnt, sess, this);"
     print "}"
     print ""
 

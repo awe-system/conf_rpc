@@ -85,11 +85,11 @@ def show_client_common():
     print ""
     print "int " + classname + "_client::connect(const std::string &ip)"
     print "{"
-    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"connect before mutex ip [%s] cb [%p]\","
-    print TWO_TEB + "ip.c_str(), cb);"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"connect before mutex ip [%s] cb [%p] sess [%p]\","
+    print TWO_TEB + "ip.c_str(), cb, sess);"
     print ONE_TEB + "std::lock_guard<std::mutex> lck(m);"
-    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"connect after mutex ip [%s] cb [%p]\","
-    print TWO_TEB + "ip.c_str(), cb);"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"connect after mutex ip [%s] cb [%p] sess [%p]\","
+    print TWO_TEB + "ip.c_str(), cb, sess);"
     print ONE_TEB + "if ( !sess )"
     print ONE_TEB + "{"
     print TWO_TEB + "sess = cb->get_session(ip);"
@@ -112,9 +112,9 @@ def show_client_common():
     print ""
     print "void " + classname + "_client::disconnect()"
     print "{"
-    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"disconnect before mutex ip [%s] cb [%p]\",_ip.c_str(), cb);"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"disconnect before mutex ip [%s] cb [%p] sess [%p]\",_ip.c_str(), cb, sess);"
     print ONE_TEB + " std::lock_guard < std::mutex > lck(m);"
-    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"disconnect after mutex ip [%s] cb [%p]\",_ip.c_str(), cb);"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"disconnect after mutex ip [%s] cb [%p] sess [%p]\",_ip.c_str(), cb, sess);"
     print ONE_TEB + "if (!sess) return;"
     print ONE_TEB + "sess->disconnect();"
     print ONE_TEB + "__sync_add_and_fetch(&cb->disconn_cnt, 1);"
@@ -217,17 +217,16 @@ def show_notsession_check():
     print ONE_TEB + "{"
     print TWO_TEB + "__sync_add_and_fetch(&cb->nosession_cnt, 1);"
     print TWO_TEB + "AWE_MODULE_DEBUG(\"communicate snd\","
-    print THREE_TEB + "\"!sess cb [%p] nosession_cnt [%lld] snd_ref_cnt [%lld] \\n\""
+    print THREE_TEB + "\"!sess cb [%p] nosession_cnt [%lld] snd_ref_cnt [%lld]  sess [%p]\\n\""
     print THREE_TEB + "\"gendata_ref_cnt [%lld]  cb_cnt [%lld]\\n\""
     print THREE_TEB + "\"cb_error_cnt [%lld] cb_normal_cnt [%lld]\","
-    print THREE_TEB + "cb, cb->nosession_cnt, cb->snd_ref_cnt, cb->gendata_ref_cnt, cb->cb_cnt,"
+    print THREE_TEB + "cb, cb->nosession_cnt, cb->snd_ref_cnt, sess, cb->gendata_ref_cnt, cb->cb_cnt,"
     print THREE_TEB + "cb->cb_error_cnt, cb->cb_normal_cnt);"
     print TWO_TEB + "return -RPC_ERROR_TYPE_CONNECT_FAIL;"
     print ONE_TEB + "}"
 
 
 def show_before_snd():
-    print ONE_TEB + "__sync_add_and_fetch(&cb->snd_ref_cnt, 1);"
     print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate snd\","
     print TWO_TEB + "\"before snd sess [%p] cb [%p] nosession_cnt [%lld] snd_ref_cnt [%lld] \\n\""
     print TWO_TEB + "\"gendata_ref_cnt [%lld]  cb_cnt [%lld]\\n\""
@@ -236,10 +235,20 @@ def show_before_snd():
     print TWO_TEB + "cb->cb_error_cnt, cb->cb_normal_cnt);"
 
 
+def show_after_snd():
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate snd\","
+    print TWO_TEB + "\"after snd sess [%p] cb [%p] nosession_cnt [%lld] snd_ref_cnt [%lld] \\n\""
+    print TWO_TEB + "\"gendata_ref_cnt [%lld]  cb_cnt [%lld]\\n\""
+    print TWO_TEB + "\"cb_error_cnt [%lld] cb_normal_cnt [%lld] errr[%lld]\","
+    print TWO_TEB + "sess, cb, cb->nosession_cnt, cb->snd_ref_cnt, cb->gendata_ref_cnt, cb->cb_cnt,"
+    print TWO_TEB + "cb->cb_error_cnt, cb->cb_normal_cnt, err_report);"
+
+
 def show_sync_client_func(func):
     show_notsession_check()
     print ONE_TEB + "int error_internal = 0;"
     print ONE_TEB + "lt_condition _internal_sync_cond;"
+    print ONE_TEB + "__sync_add_and_fetch(&cb->snd_ref_cnt, 1);"
     show_before_snd()
     print ONE_TEB + "cb->snd(sess, boost::bind(&" + classname + "_client::" + \
           func[
@@ -254,7 +263,9 @@ def show_sync_client_func(func):
     print ONE_TEB + "unsigned char *buf = res_data.get_buf();"
     show_sync_to_buf(func)
     print ONE_TEB + "error_internal = lt_data_translator::to_uint(buf);"
-    print ONE_TEB + "return err_internal | error_internal;"
+    print ONE_TEB + "int err_report = (err_internal | error_internal);"
+    show_after_snd()
+    print ONE_TEB + "return err_report;"
 
 
 def put_async_gendata_params_no_def(func):
@@ -272,11 +283,12 @@ def put_async_gendata_params_no_def(func):
 def show_async_client_func(func):
     show_notsession_check()
     show_before_snd()
-    print ONE_TEB + "return cb->snd(sess, boost::bind(&" + classname + "_client::" + \
+    print ONE_TEB + "int err_report = cb->snd(sess, boost::bind(&" + classname + "_client::" + \
           func[
               "func_name"] + "_gendata, this, " + put_async_gendata_params_no_def(
         func) + " internal_pri, _1));"
-
+    show_after_snd()
+    print ONE_TEB + "return err_report;"
 
 def show_client_funcs():
     for func in funcs:
@@ -354,10 +366,9 @@ def show_by_buf(func):
         print ONE_TEB + "return 0;"
 
 
-def show_gendata_log():
-    print ONE_TEB + "__sync_add_and_fetch(&cb->gendata_ref_cnt, 1);"
+def show_gendata_log(prefix):
     print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate gendata\","
-    print TWO_TEB + "\"before snd sess [%p] cb [%p] nosession_cnt [%lld] snd_ref_cnt [%lld] \\n\""
+    print TWO_TEB + "\""+ prefix +" snd sess [%p] cb [%p] nosession_cnt [%lld] snd_ref_cnt [%lld] \\n\""
     print TWO_TEB + "\"gendata_ref_cnt [%lld]  cb_cnt [%lld]\""
     print TWO_TEB + "\"cb_error_cnt [%lld] cb_normal_cnt [%lld] func_type [%u]\","
     print TWO_TEB + "sess, cb, cb->nosession_cnt, cb->snd_ref_cnt, cb->gendata_ref_cnt, cb->cb_cnt,"
@@ -369,7 +380,8 @@ def show_sync_generate_data_func(func):
     print "{"
     print ONE_TEB + "unsigned int func_type = server_function_callback_type_" + \
           port + "_" + func["func_name"] + ";"
-    show_gendata_log()
+    print ONE_TEB + "__sync_add_and_fetch(&cb->gendata_ref_cnt, 1);"
+    show_gendata_log("before")
     for param in func["params"]:
         if param["param_value"] == "data":
             p_name = param["param_name"]
@@ -379,6 +391,7 @@ def show_sync_generate_data_func(func):
     print ONE_TEB + "data->realloc_buf();"
     print ONE_TEB + "unsigned char *buf = data->get_buf();"
     show_by_buf(func)
+    show_gendata_log("after")
     print "}\n"
 
 
@@ -436,12 +449,13 @@ def show_async_generate_data_func(func):
     print "{"
     print ONE_TEB + "unsigned int func_type = server_function_callback_type_" + \
           port + "_" + func["func_name"] + ";"
-    show_gendata_log()
+    show_gendata_log("before")
     show_request_data(func)
     print ONE_TEB + get_async_gendate_data_len(func)
     print ONE_TEB + "data->realloc_buf();"
     print ONE_TEB + "unsigned char *buf = data->get_buf();"
     show_by_buf(func)
+    show_gendata_log("after")
     print "}\n"
 
 

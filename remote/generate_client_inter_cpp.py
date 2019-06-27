@@ -239,7 +239,7 @@ def show_after_snd():
     print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate snd\","
     print TWO_TEB + "\"after snd sess [%p] cb [%p] nosession_cnt [%lld] snd_ref_cnt [%lld] \\n\""
     print TWO_TEB + "\"gendata_ref_cnt [%lld]  cb_cnt [%lld]\\n\""
-    print TWO_TEB + "\"cb_error_cnt [%lld] cb_normal_cnt [%lld] errr[%lld]\","
+    print TWO_TEB + "\"cb_error_cnt [%lld] cb_normal_cnt [%lld] errr[%d]\","
     print TWO_TEB + "sess, cb, cb->nosession_cnt, cb->snd_ref_cnt, cb->gendata_ref_cnt, cb->cb_cnt,"
     print TWO_TEB + "cb->cb_error_cnt, cb->cb_normal_cnt, err_report);"
 
@@ -282,6 +282,7 @@ def put_async_gendata_params_no_def(func):
 
 def show_async_client_func(func):
     show_notsession_check()
+    print ONE_TEB + "__sync_add_and_fetch(&cb->snd_ref_cnt, 1);"
     show_before_snd()
     print ONE_TEB + "int err_report = cb->snd(sess, boost::bind(&" + classname + "_client::" + \
           func[
@@ -449,6 +450,7 @@ def show_async_generate_data_func(func):
     print "{"
     print ONE_TEB + "unsigned int func_type = server_function_callback_type_" + \
           port + "_" + func["func_name"] + ";"
+    print ONE_TEB + "__sync_add_and_fetch(&cb->gendata_ref_cnt, 1);"
     show_gendata_log("before")
     show_request_data(func)
     print ONE_TEB + get_async_gendate_data_len(func)

@@ -270,13 +270,6 @@ def show_disconnected_internal(classname):
     print ONE_TEB + "}"
     print "}\n"
 
-
-def show_disconnected(classname):
-    print "void " + classname + "::disconnected()"
-    print "{"
-    print "}\n"
-
-
 def show_disconnect(classname):
     print "void " + classname + "::disconnect()"
     print "{"
@@ -365,7 +358,6 @@ def show_fix(classname, withping):
     show_diconnect_async(classname)
     show_disconnect(classname)
     show_disconnected_internal(classname)
-    show_disconnected(classname)
     show_withping(classname, withping)
 
 

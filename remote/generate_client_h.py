@@ -79,7 +79,7 @@ def show_funcs(funcs):
 def show_callbacks(funcs):
     print "public:"
     print ONE_TEB + "void disconnected_internal();"
-    print ONE_TEB + "virtual void disconnected();"
+    print ONE_TEB + "virtual void disconnected() = 0;"
     for func in funcs:
         if (func["type"] == "async" and func["subtype"] != "sync"):
             show_async_callback(func)

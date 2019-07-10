@@ -44,6 +44,7 @@ def help(arg):
 
 def show_include(namespace, filename):
     print "#include \"" + filename + ".h\"\n"
+    print "#include <sys/param.h>"
     print "namespace " + namespace
     print "{\n"
 
@@ -86,7 +87,7 @@ def show_async_class_contexts():
 
 def show_constructor():
     print "server::server(int thread_num, server_handler *_handler) :"
-    print "        service(thread_num, SERVER_PORT, this), handler(_handler)"
+    print "        service(std::max(1,thread_num), SERVER_PORT, this), handler(_handler)"
     print "{"
     print ONE_TEB + "service.start_accept();"
     print "}\n"

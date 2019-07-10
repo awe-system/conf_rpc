@@ -61,9 +61,9 @@ def gen_inthread_header(func):
             elif(param["param_value"] == "char_p"):
                 str += "char * " + param["param_name"]
             else:
-                str += gfs.param_tab[param["param_value"]] + " " + param["param_name"]
+                str += gfs.gen_data_param_tab[param["param_value"]] + " " + param["param_name"]
             str += ','
-    str += "void *&internal_pri,"
+    str += "void *internal_pri,"
     str += "int error_internal)"
     return str
 

@@ -14,6 +14,7 @@ def help(arg):
 
 def show_include(namespace, filename):
     str = "#include <lt_data_translator.h>\n"
+    str += "#include <lt_function/lt_function_error.h>\n"
     str += "#include \"" + filename + ".h\"\n"
     str += "#include \"awe_conf/env.h\"\n"
     print str
@@ -295,11 +296,13 @@ def show_diconnect_async(classname):
     print ONE_TEB + "cli.disconnect();"
     print "}\n"
 
-
 def show_connect(classname):
     print "int " + classname + "::connect(const std::string &ip)"
     print "{"
     print ONE_TEB + "is_user_discon = false;"
+    print ONE_TEB + "if (is_now_connected) {"
+    print TWO_TEB + "return RPC_ERROR_TYPE_OK;"
+    print ONE_TEB + "}"
     print ONE_TEB + "int err = cli.connect(ip);"
     print ONE_TEB + "if ( !err )"
     print ONE_TEB + "{"

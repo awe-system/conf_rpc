@@ -152,11 +152,11 @@ def show_cb_new_data(func):
                           "param_name"] + ")];"
                 print THREE_TEB + "memset(___new_" + param[
                     "param_name"] + ", 0 , strlen(" + param[
-                          "param_name"] + ");"
+                          "param_name"] + "));"
                 print THREE_TEB + "memcpy(___new_" + param[
                     "param_name"] + ", " + param[
                           "param_name"] + " , strlen(" + param[
-                          "param_name"] + ");"
+                          "param_name"] + "));"
 
 
 def show_callback_func(func):

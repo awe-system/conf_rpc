@@ -18,11 +18,11 @@ param_tab = {
 
 param_declare_tab = {
     "string": "std::string",
-    "char_p": "char *",
+    "char_p": "const char *",
     "uint": "unsigned int",
     "ulong": "unsigned long",
     "bool": "bool",
-    "void_p": "void *",
+    "void_p": "const void *",
     "data": "lt_data_t",
 }
 

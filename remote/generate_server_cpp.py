@@ -18,11 +18,11 @@ param_tab = {
 
 param_declare_tab = {
     "string": "std::string",
-    "char_p": "const char *",
+    "char_p": "char *",
     "uint": "unsigned int",
     "ulong": "unsigned long",
     "bool": "bool",
-    "void_p": "const void *",
+    "void_p": "void *",
     "data": "lt_data_t",
 }
 
@@ -119,6 +119,8 @@ def generate_param(param):
         str += param["param_name"] + "._length"
         str += ", "
         str += param["param_name"] + ".get_buf()"
+    elif param["param_value"] == "void_p":
+        str += "(const void *&)" + param["param_name"]
     else:
         str += param["param_name"]
     return str

@@ -339,7 +339,7 @@ def get_async_gendate_data_len(func):
         str += gen_data_param_tab[param["param_value"]]
         str += ")"
         str += " + "
-    str += "sizeof(void *) + sizeof(void *) + sizeof(error_internal);"
+    str += "sizeof(void *) + sizeof(error_internal);"
     return str
 
 

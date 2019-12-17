@@ -14,6 +14,7 @@ def help(arg):
 
 def show_include(namespace, filename):
     str = "#include <lt_data_translator.h>\n"
+    str += "#include <lt_function/lt_function_error.h>\n"
     str += "#include \"" + filename + ".h\"\n"
     str += "#include \"awe_conf/env.h\"\n"
     print str
@@ -151,11 +152,11 @@ def show_cb_new_data(func):
                           "param_name"] + ")];"
                 print THREE_TEB + "memset(___new_" + param[
                     "param_name"] + ", 0 , strlen(" + param[
-                          "param_name"] + ");"
+                          "param_name"] + "));"
                 print THREE_TEB + "memcpy(___new_" + param[
                     "param_name"] + ", " + param[
                           "param_name"] + " , strlen(" + param[
-                          "param_name"] + ");"
+                          "param_name"] + "));"
 
 
 def show_callback_func(func):
@@ -259,7 +260,7 @@ def show_disconnected_internal(classname):
     print ONE_TEB + "is_now_connected = false;"
     print ONE_TEB + "if ( is_user_discon )"
     print ONE_TEB + "{"
-    print TWO_TEB + "cli.put_sess_ref();"
+    #print TWO_TEB + "cli.put_sess_ref();"
     print TWO_TEB + "lck.unlock();"
     print TWO_TEB + "discon_cond.notify();"
     print ONE_TEB + "}"
@@ -295,15 +296,17 @@ def show_diconnect_async(classname):
     print ONE_TEB + "cli.disconnect();"
     print "}\n"
 
-
 def show_connect(classname):
     print "int " + classname + "::connect(const std::string &ip)"
     print "{"
     print ONE_TEB + "is_user_discon = false;"
+    print ONE_TEB + "if (is_now_connected) {"
+    print TWO_TEB + "return RPC_ERROR_TYPE_OK;"
+    print ONE_TEB + "}"
     print ONE_TEB + "int err = cli.connect(ip);"
     print ONE_TEB + "if ( !err )"
     print ONE_TEB + "{"
-    print TWO_TEB + "cli.get_sess_ref();"
+    #print TWO_TEB + "cli.get_sess_ref();"
     print TWO_TEB + "handler.addcli_to_event(cli.get_sess(), this);"
     print TWO_TEB + "is_now_connected = true;"
     print ONE_TEB + "}"
@@ -325,7 +328,7 @@ def show_withping(classname, withping):
         print ONE_TEB + "while(!to_destroy)"
         print ONE_TEB + "{"
         print TWO_TEB + "std::unique_lock<std::mutex> lck(disconn_m);"
-        print TWO_TEB + "if(is_now_connected)"
+        print TWO_TEB + "if(is_now_connected&&(!is_user_discon))"
         print TWO_TEB + "{"
         print THREE_TEB + "int err = ping_internal();"
         print THREE_TEB + "if (err) is_now_connected = false;"

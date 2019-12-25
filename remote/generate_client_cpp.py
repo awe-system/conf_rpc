@@ -328,6 +328,7 @@ def show_withping(classname, withping):
         print "{"
         print ONE_TEB + "while(!to_destroy)"
         print ONE_TEB + "{"
+        print ONE_TEB + "AWE_MODULE_ERROR(\"ping run\", \" start ||||||||||||||||||||||||||| \");"
         print TWO_TEB + "std::unique_lock<std::mutex> lck(disconn_m);"
         print TWO_TEB + "if(is_now_connected&&(!is_user_discon))"
         print TWO_TEB + "{"
@@ -336,6 +337,7 @@ def show_withping(classname, withping):
         print TWO_TEB + "}"
         print TWO_TEB + "lck.unlock();"
         print TWO_TEB + "sleep(min(DEFAULT_WAIT_SECONDS/3,3));"
+        print ONE_TEB + "AWE_MODULE_ERROR(\"ping run\", \" end |||||||||||||||||||||||||| \");"
         print ONE_TEB + "}"
         print "}\n"
 

@@ -318,9 +318,11 @@ def show_withping(classname, withping):
     if withping:
         print classname + "::~" + classname + " ()"
         print "{"
+        print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \" start ******************************** \");"
         print ONE_TEB + "to_destroy = true;"
         print ONE_TEB + "th->join();"
         print ONE_TEB + "delete th;"
+        print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \" end ******************************** \");"
         print "}\n"
 
         print "void " + classname + "::run()"

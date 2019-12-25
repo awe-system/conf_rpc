@@ -313,7 +313,6 @@ def show_connect(classname):
     print ONE_TEB + "return err;"
     print "}\n"
 
-
 def show_withping(classname, withping):
     if withping:
         print classname + "::~" + classname + " ()"

@@ -255,9 +255,9 @@ def show_sync_client_func(func):
           func[
               "func_name"] + "_gendata, this, " + put_sync_gendata_params_no_def(
         func) + " &_internal_sync_cond, internal_pri, _1));"
-    print ONE_TEB + "AWE_MODULE_ERROR(\"wait start\", \" end |||||||||||||||||||||||||| \");"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \" end |||||||||||||||||||||||||| \");"
     print ONE_TEB + "int err_internal = _internal_sync_cond.wait();"
-    print ONE_TEB + "AWE_MODULE_ERROR(\"wait endl\", \" end |||||||||||||||||||||||||| \");"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \" end |||||||||||||||||||||||||| \");"
     print ONE_TEB + "if ( err_internal < 0 )"
     print ONE_TEB + "{"
     print ONE_TEB + "    return err_internal;"
@@ -526,9 +526,9 @@ def show_sync_notify(func):
     show_by_output_gen_res_buf(func)
     print THREE_TEB + "lt_data_translator::by_uint(error_internal, res_buf);"
     print THREE_TEB + "lt_condition *_internal_sync_cond = (lt_condition *) internal_sync_cond_p;"
-    print ONE_TEB + "AWE_MODULE_ERROR(\"output notify start\", \" end |||||||||||||||||||||||||| \");"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"output notify start\", \" end |||||||||||||||||||||||||| \");"
     print THREE_TEB + "_internal_sync_cond->notify(res_data, error_internal);"
-    print ONE_TEB + "AWE_MODULE_ERROR(\"output notify endl\", \" end |||||||||||||||||||||||||| \");"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"output notify endl\", \" end |||||||||||||||||||||||||| \");"
 
 
 def generate_call_param(param):
@@ -648,9 +648,9 @@ def show_by_input_cases():
             print THREE_TEB + "lt_data_t res_data;"
             print THREE_TEB + "lt_condition *_internal_sync_cond = (lt_condition *) internal_sync_cond_p;"
             print THREE_TEB + "void * internal_pri;"
-            print ONE_TEB + "AWE_MODULE_ERROR(\"input notify start\", \" end |||||||||||||||||||||||||| \");"
+            print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \" end |||||||||||||||||||||||||| \");"
             print THREE_TEB + "_internal_sync_cond->notify(res_data, error_internal);"
-            print ONE_TEB + "AWE_MODULE_ERROR(\"input notify endl\", \" end |||||||||||||||||||||||||| \");"
+            print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \" end |||||||||||||||||||||||||| \");"
         else:
             for param in func["pt_params"]:
                 print THREE_TEB + param_declare_tab[

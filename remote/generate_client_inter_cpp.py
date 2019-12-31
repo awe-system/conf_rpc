@@ -526,9 +526,9 @@ def show_sync_notify(func):
     show_by_output_gen_res_buf(func)
     print THREE_TEB + "lt_data_translator::by_uint(error_internal, res_buf);"
     print THREE_TEB + "lt_condition *_internal_sync_cond = (lt_condition *) internal_sync_cond_p;"
-    print ONE_TEB + "AWE_MODULE_DEBUG(\"output notify start\", \" end |||||||||||||||||||||||||| \");"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \" end |||||||||||||||||||||||||| \");"
     print THREE_TEB + "_internal_sync_cond->notify(res_data, error_internal);"
-    print ONE_TEB + "AWE_MODULE_DEBUG(\"output notify endl\", \" end |||||||||||||||||||||||||| \");"
+    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \" end |||||||||||||||||||||||||| \");"
 
 
 def generate_call_param(param):

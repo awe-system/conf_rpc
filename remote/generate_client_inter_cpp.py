@@ -609,7 +609,7 @@ def show_by_output():
 def show_skip_buf(func):
     if func["type"] == "sync":
         for param in func["params"]:
-            if param["param_type"] == "in":
+            if param["param_type"] != "out":
                 print THREE_TEB + "lt_data_translator::skip_" + param[
                     "param_value"] + "(buf);"
     else:

@@ -317,18 +317,15 @@ def show_withping(classname, withping):
     if withping:
         print classname + "::~" + classname + " ()"
         print "{"
-        print ONE_TEB + "AWE_MODULE_ERROR(\"testrpc\", \" start ||||||||||||||||||||||||||| \");"
         print ONE_TEB + "to_destroy = true;"
         print ONE_TEB + "th->join();"
         print ONE_TEB + "delete th;"
-        print ONE_TEB + "AWE_MODULE_ERROR(\"testrpc\", \" end |||||||||||||||||||||||||| \");"
         print "}\n"
 
         print "void " + classname + "::run()"
         print "{"
         print ONE_TEB + "while(!to_destroy)"
         print ONE_TEB + "{"
-        print ONE_TEB + "AWE_MODULE_ERROR(\"ping run\", \" start ||||||||||||||||||||||||||| \");"
         print TWO_TEB + "std::unique_lock<std::mutex> lck(disconn_m);"
         print TWO_TEB + "if(is_now_connected&&(!is_user_discon))"
         print TWO_TEB + "{"
@@ -337,7 +334,6 @@ def show_withping(classname, withping):
         print TWO_TEB + "}"
         print TWO_TEB + "lck.unlock();"
         print TWO_TEB + "sleep(min(DEFAULT_WAIT_SECONDS/3,3));"
-        print ONE_TEB + "AWE_MODULE_ERROR(\"ping run\", \" end |||||||||||||||||||||||||| \");"
         print ONE_TEB + "}"
         print "}\n"
 

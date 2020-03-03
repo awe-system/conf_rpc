@@ -179,9 +179,9 @@ def put_sync_snd_params(func):
 
 
 def show_sync_snd(func):
-    str = THREE_TEB + "service.snd(sess, boost::bind(&server::" + func["func_name"] + "_gendata, this, "
+    str = THREE_TEB + func["func_name"] + "_gendata("
     str += put_sync_snd_params(func)
-    str += "error_internal, internal_sync_cond_p, internal_pri, _1));"
+    str += "error_internal, internal_sync_cond_p, internal_pri, data));"
     print str
 
 
@@ -193,7 +193,9 @@ def show_switch():
         show_to_buf(func)
         show_do_handler(func)
         if func["type"] == "sync":
+            print THREE_TEB + "lt_data_t *data = new lt_data_t;"
             show_sync_snd(func)
+            print THREE_TEB + "service.snd(sess, data);"
             print THREE_TEB + "delete request_data;"
         print TWO_TEB + "}"
         print THREE_TEB + "break;"
@@ -415,11 +417,16 @@ def show_done():
             str += ONE_TEB + func["func_name"] + "_context *context = (" + func["func_name"] + "_context *) server_context;\n"
             str += ONE_TEB + "lt_session_serv *sess = context->sess;\n"
             str += get_response_data(func)
-            str += ONE_TEB + "int err_internal = service.snd(sess, boost::bind(&server::" + func["func_name"] + "_done_gendata, this, "
+
+            str += ONE_TEB + "lt_data_t *data = new lt_data_t;\n"
+
+            str += ONE_TEB + func["func_name"] + "_done_gendata("
             out_str = put_call_async_gendata_params(func)
             if len(out_str) > 0:
                 str += out_str + ", "
-            str += "server_context, error_internal, _1));\n"
+            str += "server_context, error_internal, data);\n"
+            str += ONE_TEB + "service.snd(sess, data);\n"
+
             str += ONE_TEB + "lt_data_t *request_data = context->request_data;\n"
             str += ONE_TEB + "delete request_data;\n"
             str += ONE_TEB + "delete context;\n"

@@ -251,13 +251,13 @@ def show_sync_client_func(func):
     print ONE_TEB + "lt_condition _internal_sync_cond;"
     print ONE_TEB + "__sync_add_and_fetch(&cb->snd_ref_cnt, 1);"
     show_before_snd()
-    print ONE_TEB + "cb->snd(sess, boost::bind(&" + classname + "_client::" + \
-          func[
-              "func_name"] + "_gendata, this, " + put_sync_gendata_params_no_def(
-        func) + " &_internal_sync_cond, internal_pri, _1));"
-    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \" end |||||||||||||||||||||||||| \");"
+
+    print ONE_TEB + "lt_data_t *data = new lt_data_t;"
+    print ONE_TEB + func["func_name"] + "_gendata(" + put_sync_gendata_params_no_def(
+        func) + " &_internal_sync_cond, internal_pri, data);"
+    print ONE_TEB + "cb->snd(sess, data);"
+
     print ONE_TEB + "int err_internal = _internal_sync_cond.wait();"
-    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \" end |||||||||||||||||||||||||| \");"
     print ONE_TEB + "if ( err_internal < 0 )"
     print ONE_TEB + "{"
     print ONE_TEB + "    return err_internal;"
@@ -287,10 +287,10 @@ def show_async_client_func(func):
     show_notsession_check()
     print ONE_TEB + "__sync_add_and_fetch(&cb->snd_ref_cnt, 1);"
     show_before_snd()
-    print ONE_TEB + "int err_report = cb->snd(sess, boost::bind(&" + classname + "_client::" + \
-          func[
-              "func_name"] + "_gendata, this, " + put_async_gendata_params_no_def(
-        func) + " internal_pri, _1));"
+    print ONE_TEB + "lt_data_t *data = new lt_data_t;"
+    print ONE_TEB + func["func_name"] + "_gendata(" + put_async_gendata_params_no_def(
+        func) + " internal_pri, data);"
+    print ONE_TEB + "int err_report = cb->snd(sess, data);"
     show_after_snd()
     print ONE_TEB + "return err_report;"
 
@@ -526,9 +526,7 @@ def show_sync_notify(func):
     show_by_output_gen_res_buf(func)
     print THREE_TEB + "lt_data_translator::by_uint(error_internal, res_buf);"
     print THREE_TEB + "lt_condition *_internal_sync_cond = (lt_condition *) internal_sync_cond_p;"
-    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \" end |||||||||||||||||||||||||| \");"
     print THREE_TEB + "_internal_sync_cond->notify(res_data, error_internal);"
-    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \" end |||||||||||||||||||||||||| \");"
 
 
 def generate_call_param(param):
@@ -648,9 +646,7 @@ def show_by_input_cases():
             print THREE_TEB + "lt_data_t res_data;"
             print THREE_TEB + "lt_condition *_internal_sync_cond = (lt_condition *) internal_sync_cond_p;"
             print THREE_TEB + "void * internal_pri;"
-            print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \" end |||||||||||||||||||||||||| \");"
             print THREE_TEB + "_internal_sync_cond->notify(res_data, error_internal);"
-            print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \" end |||||||||||||||||||||||||| \");"
         else:
             for param in func["pt_params"]:
                 print THREE_TEB + param_declare_tab[

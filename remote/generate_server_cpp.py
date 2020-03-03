@@ -181,7 +181,7 @@ def put_sync_snd_params(func):
 def show_sync_snd(func):
     str = THREE_TEB + func["func_name"] + "_gendata("
     str += put_sync_snd_params(func)
-    str += "error_internal, internal_sync_cond_p, internal_pri, data));"
+    str += "error_internal, internal_sync_cond_p, internal_pri, data);"
     print str
 
 

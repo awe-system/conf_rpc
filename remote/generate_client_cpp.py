@@ -349,7 +349,7 @@ def show_fix(classname, withping):
     if (withping):
         print TWO_TEB + "is_now_connected(false),to_destroy(false)"
         print "{"
-        print ONE_TEB + "th = new thread(test_ping_func, this);"
+        print ONE_TEB + "th = new std::thread(test_ping_func, this);"
         print "}\n"
 
         print "void *test_ping_func(" + classname + " *cli)"

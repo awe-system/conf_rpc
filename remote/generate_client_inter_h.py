@@ -51,7 +51,8 @@ def show_include(namespace):
     str += "#include <lt_session_cli_set.h>\n"
     str += "#include <lt_data_translator.h>\n"
     str += "#include <lt_condition.h>\n"
-    str += "#include <thread_pool.hpp>\n\n"
+    str += "#include <thread_pool.hpp>\n"
+    str += "#include <utils.h>\n\n"
     str += "#ifndef IN\n#define IN\n#endif\n\n" \
            "#ifndef OUT\n#define OUT\n#endif\n\n" \
            "#ifndef INOUT\n#define INOUT\n#endif\n\n"
@@ -142,14 +143,12 @@ def show_client_head():
     print ("{")
     print("private:")
     print(ONE_TEB + classname + "_client_callback *cb;")
-    print(ONE_TEB + "std::mutex m;")
+    print(ONE_TEB + "rw_lock_t m;")
     print(ONE_TEB + "lt_session_cli_safe *sess;")
     print(ONE_TEB + "std::string _ip = \"\";\n")
     print("public:")
     print(
         ONE_TEB + classname + "_client(" + classname + "_client_callback *_cb);\n")
-    print(ONE_TEB + "void get_sess_ref();\n")
-    print(ONE_TEB + "void put_sess_ref();\n")
     print(ONE_TEB + "int connect(const std::string &ip);\n")
     print(ONE_TEB + "void disconnect();\n")
     print(ONE_TEB + " void *get_sess(){ return sess;}\n")

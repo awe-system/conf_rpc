@@ -57,27 +57,6 @@ def show_include(namespace, filename):
 def show_port(port):
     print "#define SERVER_PORT    " + str(port) + "\n"
 
-
-def show_get_put_ses_ref():
-    print "void " + classname + "_client::get_sess_ref()"
-    print "{"
-    print ONE_TEB + " std::lock_guard < std::mutex > lck(m);"
-    print ONE_TEB + "auto new_sess = cb->get_session(_ip);"
-    print ONE_TEB + "assert(sess == new_sess);"
-    print "}"
-    print ""
-    print "void " + classname + "_client::put_sess_ref()"
-    print "{"
-    print ONE_TEB + " std::lock_guard < std::mutex > lck(m);"
-    print ONE_TEB + "bool is_destroy = cb->put_session(sess);"
-    print ONE_TEB + "if(is_destroy)"
-    print ONE_TEB + "{"
-    print TWO_TEB + "sess = NULL;"
-    print ONE_TEB + "}"
-    print "}"
-    print ""
-
-
 def show_client_common():
     print commands.getoutput("cat ./src/client_cpp_body")
     print classname + "_client::" + classname + "_client(" + classname + "_client_callback *_cb) : cb(_cb), sess(NULL)"
@@ -87,7 +66,7 @@ def show_client_common():
     print "{"
     print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"connect before mutex ip [%s] cb [%p] sess [%p]\","
     print TWO_TEB + "ip.c_str(), cb, sess);"
-    print ONE_TEB + "std::lock_guard<std::mutex> lck(m);"
+    print ONE_TEB + "write_lock_t lck(m);"
     print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"connect after mutex ip [%s] cb [%p] sess [%p]\","
     print TWO_TEB + "ip.c_str(), cb, sess);"
     #print ONE_TEB + "if ( !sess )"
@@ -114,20 +93,16 @@ def show_client_common():
     print "void " + classname + "_client::disconnect()"
     print "{"
     print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"disconnect before mutex ip [%s] cb [%p] sess [%p]\",_ip.c_str(), cb, sess);"
-    print ONE_TEB + " std::lock_guard < std::mutex > lck(m);"
+    print ONE_TEB + "write_lock_t lck(m);"
     print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"disconnect after mutex ip [%s] cb [%p] sess [%p]\",_ip.c_str(), cb, sess);"
     print ONE_TEB + "if (!sess) return;"
     print ONE_TEB + "sess->disconnect();"
     print ONE_TEB + "__sync_add_and_fetch(&cb->disconn_cnt, 1);"
     print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"after [%p]->disconnect cb [%p] \\nconnect_cnt [%lld] disconn_cnt [%lld]\",sess, cb, cb->connect_cnt, cb->disconn_cnt);"
-    print ONE_TEB + "bool is_destroy = cb->put_session(sess);"
-    print ONE_TEB + "if(is_destroy)"
-    print ONE_TEB + "{"
-    print TWO_TEB + "sess = NULL;"
-    print ONE_TEB + "}"
+    print ONE_TEB + "cb->put_session(sess);"
+    print ONE_TEB + "sess = NULL;"
     print "}"
     print ""
-    show_get_put_ses_ref()
 
 
 def generate_param(param):
@@ -214,6 +189,7 @@ def show_sync_to_buf(func):
 
 
 def show_notsession_check():
+    print ONE_TEB + "read_lock_t lck(m);"
     print ONE_TEB + "if ( !sess )"
     print ONE_TEB + "{"
     print TWO_TEB + "__sync_add_and_fetch(&cb->nosession_cnt, 1);"
@@ -360,14 +336,13 @@ def show_by_buf(func):
                         "param_value"] + "(" + param["param_name"] + ", buf);"
         print ONE_TEB + "lt_data_translator::by_void_p(_internal_sync_cond, buf);"
         print ONE_TEB + "lt_data_translator::by_void_p(internal_pri, buf);"
-        print ONE_TEB + "return 0;"
+
     else:
         for param in func["params"]:
             if param["param_type"] != "out":
                 print ONE_TEB + "lt_data_translator::by_" + param[
                     "param_value"] + "(" + param["param_name"] + ", buf);"
         print ONE_TEB + "lt_data_translator::by_void_p(internal_pri, buf);"
-        print ONE_TEB + "return 0;"
 
 
 def show_gendata_log(prefix):
@@ -396,6 +371,7 @@ def show_sync_generate_data_func(func):
     print ONE_TEB + "unsigned char *buf = data->get_buf();"
     show_by_buf(func)
     show_gendata_log("after")
+    print ONE_TEB + "return 0;"
     print "}\n"
 
 
@@ -461,6 +437,7 @@ def show_async_generate_data_func(func):
     print ONE_TEB + "unsigned char *buf = data->get_buf();"
     show_by_buf(func)
     show_gendata_log("after")
+    print ONE_TEB + "return 0;"
     print "}\n"
 
 

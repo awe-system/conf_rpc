@@ -51,8 +51,7 @@ def show_include(namespace):
     str += "#include <lt_session_cli_set.h>\n"
     str += "#include <lt_data_translator.h>\n"
     str += "#include <lt_condition.h>\n"
-    str += "#include <thread_pool.hpp>\n"
-    str += "#include <utils.h>\n\n"
+    str += "#include <thread_pool.hpp>\n\n"
     str += "#ifndef IN\n#define IN\n#endif\n\n" \
            "#ifndef OUT\n#define OUT\n#endif\n\n" \
            "#ifndef INOUT\n#define INOUT\n#endif\n\n"

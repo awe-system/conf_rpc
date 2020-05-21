@@ -161,15 +161,15 @@ def show_cb_new_data(func):
 
 def show_callback_func(func):
     show_callback_func_head(func)
-    print TWO_TEB + "if(!error_internal)"
-    print TWO_TEB + "{"
+    # print TWO_TEB + "if(!error_internal)"
+    # print TWO_TEB + "{"
     print THREE_TEB + gen_call_cb_direct(func)
-    print TWO_TEB + "}"
-    print TWO_TEB + "else"
-    print TWO_TEB + "{"
-    show_cb_new_data(func)
-    print THREE_TEB + gen_post(func)
-    print TWO_TEB + "}"
+    # print TWO_TEB + "}"
+    # print TWO_TEB + "else"
+    # print TWO_TEB + "{"
+    # show_cb_new_data(func)
+    # print THREE_TEB + gen_post(func)
+    # print TWO_TEB + "}"
     show_callback_func_end()
 
 

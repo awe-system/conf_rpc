@@ -57,6 +57,7 @@ def show_include(namespace, filename):
 def show_port(port):
     print "#define SERVER_PORT    " + str(port) + "\n"
 
+
 def show_client_common():
     print commands.getoutput("cat ./src/client_cpp_body")
     print classname + "_client::" + classname + "_client(" + classname + "_client_callback *_cb) : cb(_cb), sess(NULL)"
@@ -69,12 +70,12 @@ def show_client_common():
     print ONE_TEB + "write_lock_t lck(m);"
     print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"connect after mutex ip [%s] cb [%p] sess [%p]\","
     print TWO_TEB + "ip.c_str(), cb, sess);"
-    #print ONE_TEB + "if ( !sess )"
-    #print ONE_TEB + "{"
+    # print ONE_TEB + "if ( !sess )"
+    # print ONE_TEB + "{"
     print ONE_TEB + "sess = cb->get_session(ip);"
     print ONE_TEB + "if ( !sess )"
     print TWO_TEB + "return -RPC_ERROR_TYPE_CONNECT_FAIL;"
-    #print ONE_TEB + "}"
+    # print ONE_TEB + "}"
     print ONE_TEB + "try"
     print ONE_TEB + "{"
     print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"before [%p]->connect(%s) cb [%p]\",sess, ip.c_str(), cb);"
@@ -92,13 +93,13 @@ def show_client_common():
     print ""
     print "void " + classname + "_client::disconnect()"
     print "{"
-    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"disconnect before mutex ip [%s] cb [%p] sess [%p]\",_ip.c_str(), cb, sess);"
+    print ONE_TEB + "AWE_MODULE_ERROR(\"communicate\", \"disconnect before mutex ip [%s] cb [%p] sess [%p]\",_ip.c_str(), cb, sess);"
     print ONE_TEB + "write_lock_t lck(m);"
-    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"disconnect after mutex ip [%s] cb [%p] sess [%p]\",_ip.c_str(), cb, sess);"
+    print ONE_TEB + "AWE_MODULE_ERROR(\"communicate\", \"disconnect after mutex ip [%s] cb [%p] sess [%p]\",_ip.c_str(), cb, sess);"
     print ONE_TEB + "if (!sess) return;"
     print ONE_TEB + "sess->disconnect();"
     print ONE_TEB + "__sync_add_and_fetch(&cb->disconn_cnt, 1);"
-    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate\", \"after [%p]->disconnect cb [%p] \\nconnect_cnt [%lld] disconn_cnt [%lld]\",sess, cb, cb->connect_cnt, cb->disconn_cnt);"
+    print ONE_TEB + "AWE_MODULE_ERROR(\"communicate\", \"after [%p]->disconnect cb [%p] \\nconnect_cnt [%lld] disconn_cnt [%lld]\",sess, cb, cb->connect_cnt, cb->disconn_cnt);"
     print ONE_TEB + "cb->put_session(sess);"
     print ONE_TEB + "sess = NULL;"
     print "}"
@@ -229,7 +230,8 @@ def show_sync_client_func(func):
     show_before_snd()
 
     print ONE_TEB + "lt_data_t *data = new lt_data_t;"
-    print ONE_TEB + func["func_name"] + "_gendata(" + put_sync_gendata_params_no_def(
+    print ONE_TEB + func[
+        "func_name"] + "_gendata(" + put_sync_gendata_params_no_def(
         func) + " &_internal_sync_cond, internal_pri, data);"
     print ONE_TEB + "cb->snd(sess, data);"
 
@@ -264,11 +266,13 @@ def show_async_client_func(func):
     print ONE_TEB + "__sync_add_and_fetch(&cb->snd_ref_cnt, 1);"
     show_before_snd()
     print ONE_TEB + "lt_data_t *data = new lt_data_t;"
-    print ONE_TEB + func["func_name"] + "_gendata(" + put_async_gendata_params_no_def(
+    print ONE_TEB + func[
+        "func_name"] + "_gendata(" + put_async_gendata_params_no_def(
         func) + " internal_pri, data);"
     print ONE_TEB + "int err_report = cb->snd(sess, data);"
     show_after_snd()
     print ONE_TEB + "return err_report;"
+
 
 def show_client_funcs():
     for func in funcs:
@@ -347,7 +351,7 @@ def show_by_buf(func):
 
 def show_gendata_log(prefix):
     print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate gendata\","
-    print TWO_TEB + "\""+ prefix +" snd sess [%p] cb [%p] nosession_cnt [%lld] snd_ref_cnt [%lld] \\n\""
+    print TWO_TEB + "\"" + prefix + " snd sess [%p] cb [%p] nosession_cnt [%lld] snd_ref_cnt [%lld] \\n\""
     print TWO_TEB + "\"gendata_ref_cnt [%lld]  cb_cnt [%lld]\""
     print TWO_TEB + "\"cb_error_cnt [%lld] cb_normal_cnt [%lld] func_type [%u]\","
     print TWO_TEB + "sess, cb, cb->nosession_cnt, cb->snd_ref_cnt, cb->gendata_ref_cnt, cb->cb_cnt,"
@@ -673,7 +677,7 @@ def show_disconnected():
     print "void " + classname + "_client_callback::disconnected(lt_session *sess)"
     print "{"
     print ONE_TEB + "__sync_add_and_fetch(&disconnected_cnt, 1);"
-    print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
+    print ONE_TEB + "AWE_MODULE_ERROR(\"communicate callback\","
     print TWO_TEB + "\"connect_cnt [%lld] disconn_cnt [%lld] disconnected [%lld] disconninthread_cnt [%lld] sess [%p] this [%p]\\n\","
     print TWO_TEB + "connect_cnt, disconn_cnt, disconnected_cnt, disconninthread_cnt, sess, this);"
     print ONE_TEB + "pool.submit_task(boost::bind("
@@ -707,6 +711,13 @@ def show_client_callback():
     show_disconnected_inthread()
 
 
+def show_client_destroycallback():
+    print classname + "_client_callback::~" + classname + "_client_callback()"
+    print "{"
+    print ONE_TEB + "AWE_MODULE_INFO(\"" + classname + "\",\"~" + classname + "\");"
+    print "}"
+
+
 def show_end():
     print "}"
 
@@ -725,4 +736,5 @@ if __name__ == '__main__':
     show_client_funcs()
     show_client_gendata()
     show_client_callback()
+    show_client_destroycallback()
     show_end()

@@ -128,6 +128,8 @@ def show_client_callback(classname):
     print(ONE_TEB + "long long disconn_cnt = 0;\n")
     print "public:"
     print ONE_TEB + classname + "_client_callback(int thread_num, " + classname + "_callback_handler *cb_handler);\n"
+    print ONE_TEB  + "virtual ~"+ classname + "_client_callback();\n"
+
     print ONE_TEB + "void disconnected_inthread(lt_session *sess);\n"
     print "private:"
     print ONE_TEB + "void handler_by_output(lt_data_t *received_data) override;\n"

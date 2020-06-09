@@ -151,7 +151,7 @@ def generate_async_cb_param_doma_end(params):
 
 
 def client_sync_head(func):
-    str = "int "
+    str = "virtual int "
     str += func["func_name"] + "("
     str += generate_all_param(func["params"])
     str += ")"
@@ -159,7 +159,7 @@ def client_sync_head(func):
 
 
 def client_async_head(func):
-    str = "int "
+    str = "virtual int "
     str += func["func_name"] + "("
     str += generate_async_param(func["params"])
     str += ")"

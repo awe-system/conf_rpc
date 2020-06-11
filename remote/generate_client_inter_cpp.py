@@ -680,9 +680,7 @@ def show_disconnected():
     print ONE_TEB + "AWE_MODULE_ERROR(\"communicate callback\","
     print TWO_TEB + "\"connect_cnt [%lld] disconn_cnt [%lld] disconnected [%lld] disconninthread_cnt [%lld] sess [%p] this [%p]\\n\","
     print TWO_TEB + "connect_cnt, disconn_cnt, disconnected_cnt, disconninthread_cnt, sess, this);"
-    print ONE_TEB + "pool.submit_task(boost::bind("
-    print TWO_TEB + "&" + classname + "_client_callback::disconnected_inthread, this,"
-    print TWO_TEB + "sess));"
+    print ONE_TEB + "disconnected_inthread(sess);"
     print "}"
     print ""
 

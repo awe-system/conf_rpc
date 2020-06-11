@@ -114,7 +114,6 @@ def show_client_callback(classname):
     print "private:"
     print ONE_TEB + classname + "_callback_handler *cb_handler;"
     print ONE_TEB + "lt_thread_server server;\n"
-    print ONE_TEB + "data_channel::thread_pool pool;\n"
     print "public:\n"
     print ONE_TEB + "long long disconnected_cnt = 0;"
     print ONE_TEB + "long long disconninthread_cnt = 0;"
@@ -147,9 +146,11 @@ def show_client_head():
     print(ONE_TEB + "rw_lock_t m;")
     print(ONE_TEB + "lt_session_cli_safe *sess;")
     print(ONE_TEB + "std::string _ip = \"\";\n")
+    print(ONE_TEB + " bool is_conn = false;\n")
     print("public:")
     print(
         ONE_TEB + classname + "_client(" + classname + "_client_callback *_cb);\n")
+    print(ONE_TEB + "void wait_done();\n")
     print(ONE_TEB + "int connect(const std::string &ip);\n")
     print(ONE_TEB + "void disconnect();\n")
     print(ONE_TEB + " void *get_sess(){ return sess;}\n")

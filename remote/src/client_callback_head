@@ -1,8 +1,7 @@
         cb_handler(cb_handler),
         server(thread_num),
         lt_session_cli_set(NULL, this),
-        lt_client_service(NULL, SERVER_PORT),
-        pool(1)
+        lt_client_service(NULL, SERVER_PORT)
 {
     lt_session_cli_set::set_ioservice(server.get_io_service());
     lt_client_service::set_ioservice(server.get_io_service());

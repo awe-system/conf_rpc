@@ -558,13 +558,13 @@ def show_async_callback(func):
 
 def show_byoutout_startlog(name):
     print THREE_TEB + "__sync_add_and_fetch(&cb_normal_cnt, 1);"
-    print THREE_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
     print THREE_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
     print THREE_TEB + ONE_TEB + "\"" + name + " normal start cb_normal_cnt [%lld] cb_cnt [%lld] this [%p] snd_ref_cnt [%lld] gendata_ref_cnt [%lld] \\n\","
     print THREE_TEB + ONE_TEB + "cb_normal_cnt, cb_cnt, this,snd_ref_cnt,gendata_ref_cnt);"
 
 
 def show_byoutout_endlog(name):
+    print THREE_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
     print THREE_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
     print THREE_TEB + ONE_TEB + "\"" + name + " normal end cb_normal_cnt [%lld] cb_cnt [%lld] this [%p] snd_ref_cnt [%lld] gendata_ref_cnt [%lld]\\n\","
     print THREE_TEB + ONE_TEB + "cb_normal_cnt, cb_cnt, this,snd_ref_cnt,gendata_ref_cnt);"

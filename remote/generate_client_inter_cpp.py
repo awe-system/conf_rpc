@@ -617,7 +617,6 @@ def show_skip_buf(func):
 
 def show_byinput_starlog(name):
     print THREE_TEB + "__sync_add_and_fetch(&cb_error_cnt, 1);"
-    print THREE_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
     print THREE_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
     print THREE_TEB + ONE_TEB + "\"" + name + " Err start cb_normal_cnt [%lld] cb_cnt [%lld] err_internal [%d]\\n\""
     print THREE_TEB + ONE_TEB + "\"this [%p]\","
@@ -625,6 +624,7 @@ def show_byinput_starlog(name):
 
 
 def show_byinput_endlog(name):
+    print THREE_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
     print THREE_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
     print THREE_TEB + ONE_TEB + "\"" + name + " Err end cb_normal_cnt [%lld] cb_cnt [%lld] err_internal [%d]\\n\""
     print THREE_TEB + ONE_TEB + "\"this [%p]\","

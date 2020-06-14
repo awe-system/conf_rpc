@@ -39,7 +39,7 @@ def show_handler_head(classname):
     print ONE_TEB + "data_channel::thread_pool pool;"
     print "public:"
     print ONE_TEB + classname + "_thread_handler():pool(1){};\n"
-
+    print ONE_TEB + "virtual ~"+ classname + "_thread_handler(){AWE_MODULE_ERROR(\"thread_handler\",\"thread_handler %p\", this);sleep(600);};\n"
 
 def show_handler_end():
     print "};\n"

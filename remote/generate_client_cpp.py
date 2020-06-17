@@ -83,7 +83,7 @@ def show_callback_func_end():
 
 
 def show_async_callback(func):
-    print TWO_TEB + classname + " *node = (" + classname + " *)internal_pri;"
+    print TWO_TEB + classname + " *node = (" + classname + " *)(comm_io_contexts.org_pri(internal_pri));"
     print TWO_TEB + "node->" + func[
         "func_name"] + "_callback(" + gfs.client_async_cb_values(func) + ");"
 
@@ -382,7 +382,7 @@ def show_func_end():
 
 
 def show_direct_func(func):
-    print ONE_TEB + "void *internal_pri = (void *) this;"
+    print ONE_TEB + "void *internal_pri = comm_io_contexts.context(this);"
     print ONE_TEB + "return cli." + func[
         "func_name"] + "(" + gfs.client_func_values(func) + ");"
 

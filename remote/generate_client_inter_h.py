@@ -52,6 +52,7 @@ def show_include(namespace):
     str += "#include <lt_data_translator.h>\n"
     str += "#include <lt_condition.h>\n"
     str += "#include <thread_pool.hpp>\n\n"
+    str += "#include <lt_function/safe_voidp_map.h>\n\n"
     str += "#ifndef IN\n#define IN\n#endif\n\n" \
            "#ifndef OUT\n#define OUT\n#endif\n\n" \
            "#ifndef INOUT\n#define INOUT\n#endif\n\n"
@@ -114,6 +115,7 @@ def show_client_callback(classname):
     print "private:"
     print ONE_TEB + classname + "_callback_handler *cb_handler;"
     print ONE_TEB + "lt_thread_server server;\n"
+    print ONE_TEB + "safe_voidp_map internal_sent_data_map;\n"
     print "public:\n"
     print ONE_TEB + "long long disconnected_cnt = 0;"
     print ONE_TEB + "long long disconninthread_cnt = 0;"
@@ -130,7 +132,12 @@ def show_client_callback(classname):
     print ONE_TEB  + "virtual ~"+ classname + "_client_callback();\n"
 
     print ONE_TEB + "void disconnected_inthread(lt_session *sess);\n"
+    print ONE_TEB + "void mark_sent(void * internal_pri, lt_data_t * data);\n"
+    print ONE_TEB + "void clear_by_input();\n"
     print "private:"
+    print ONE_TEB + "void mark_rcvd(void * internal_pri);\n"
+    print "private:"
+    print ONE_TEB + "void handler_rcvd() override;\n"
     print ONE_TEB + "void handler_by_output(lt_data_t *received_data) override;\n"
     print ONE_TEB + "void handler_by_input(lt_data_t *sent_data, int error_internal) override;\n"
     print "protected:"

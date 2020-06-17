@@ -71,6 +71,7 @@ def show_client_common():
     print TWO_TEB + "snd_cnt = cb->snd_ref_cnt;"
     print TWO_TEB + " usleep(1000);"
     print ONE_TEB + "} while ( cb_cnt != snd_cnt );"
+    print ONE_TEB + "cb->clear_by_input();"
     print ONE_TEB + "cb->cb_cnt      = 0;"
     print ONE_TEB + "cb->snd_ref_cnt      = 0;"
     print "}"
@@ -250,8 +251,12 @@ def show_sync_client_func(func):
     print ONE_TEB + func[
         "func_name"] + "_gendata(" + put_sync_gendata_params_no_def(
         func) + " &_internal_sync_cond, internal_pri, data);"
-    print ONE_TEB + "cb->snd(sess, data);"
-
+    print ONE_TEB + "cb->mark_sent(internal_pri, data);"
+    print ONE_TEB + "int err_snd = cb->snd(sess, data);"
+    print ONE_TEB + "if ( err_snd < 0 )"
+    print ONE_TEB + "{"
+    print ONE_TEB + "    return err_snd;"
+    print ONE_TEB + "}"
     print ONE_TEB + "int err_internal = _internal_sync_cond.wait();"
     print ONE_TEB + "if ( err_internal < 0 )"
     print ONE_TEB + "{"
@@ -286,6 +291,7 @@ def show_async_client_func(func):
     print ONE_TEB + func[
         "func_name"] + "_gendata(" + put_async_gendata_params_no_def(
         func) + " internal_pri, data);"
+    print ONE_TEB + "cb->mark_sent(internal_pri, data);"
     print ONE_TEB + "int err_report = cb->snd(sess, data);"
     show_after_snd()
     print ONE_TEB + "return err_report;"
@@ -522,6 +528,7 @@ def show_sync_notify(func):
         func) + "sizeof(error_internal));"
     print THREE_TEB + "unsigned char *res_buf = res_data.get_buf();"
     show_by_output_gen_res_buf(func)
+    print THREE_TEB + "mark_rcvd(internal_pri);"
     print THREE_TEB + "lt_data_translator::by_uint(error_internal, res_buf);"
     print THREE_TEB + "lt_condition *_internal_sync_cond = (lt_condition *) internal_sync_cond_p;"
     print THREE_TEB + "_internal_sync_cond->notify(res_data, error_internal);"
@@ -551,6 +558,7 @@ def get_async_callback_params(func):
 
 
 def show_async_callback(func):
+    print THREE_TEB + "mark_rcvd(internal_pri);"
     print THREE_TEB + "cb_handler->" + func[
         "func_name"] + "_callback(" + get_async_callback_params(
         func) + "internal_pri, error_internal);"
@@ -586,6 +594,39 @@ def show_by_output_cases():
         show_byoutout_endlog(func["func_name"])
         print TWO_TEB + "}"
         print THREE_TEB + "break;"
+
+def show_mark_sent():
+    print "void " + classname + "_client_callback::mark_sent(void *internal_pri,lt_data_t *data)"
+    print "{"
+    print ONE_TEB + "internal_sent_data_map.in(internal_pri,(void *)data);\n"
+    print "}\n"
+
+def show_mark_rcvd():
+    print "void " + classname + "_client_callback::mark_rcvd(void *internal_pri)"
+    print "{"
+    print ONE_TEB + "auto sent_data = (lt_data_t *)internal_sent_data_map.out(internal_pri);\n"
+    print ONE_TEB + "assert(sent_data);\n"
+    print ONE_TEB + "delete sent_data;\n"
+    print "}\n"
+
+def show_handler_rcvd():
+    print "void " + classname + "_client_callback::handler_rcvd()"
+    print "{"
+    print ONE_TEB + "__sync_add_and_fetch(&cb_cnt, 1);\n"
+    print "}\n"
+
+
+def show_clear_by_input():
+    print "void " + classname + "_client_callback::clear_by_input()"
+    print "{"
+    print ONE_TEB + "std::map<void *, void*> out_map;\n"
+    print ONE_TEB + "internal_sent_data_map.cp(out_map)\n;"
+    print ONE_TEB + "for(auto it : out_map)\n"
+    print ONE_TEB + "{\n"
+    print TWO_TEB + "lt_data_t * sent_data = static_cast<lt_data_t *>(it.second);\n"
+    print TWO_TEB + "handler_by_input(sent_data, -RPC_ERROR_TYPE_NET_BROKEN);\n"
+    print ONE_TEB + "}\n"
+    print "}\n"
 
 
 def show_by_output():
@@ -720,6 +761,10 @@ def show_disconnected_inthread():
 
 def show_client_callback():
     show_client_callback_head()
+    show_mark_rcvd()
+    show_mark_sent()
+    show_clear_by_input()
+    show_handler_rcvd()
     show_by_output()
     show_by_input()
     show_disconnected()

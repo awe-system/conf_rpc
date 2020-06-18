@@ -185,6 +185,13 @@ def client_func_values(func):
     str += "internal_pri"
     return str
 
+def client_syncfunc_values(func):
+    str = ""
+    for param in func["params"]:
+        str += generate_func_value(param)
+        str += ", "
+    str += "internal_pri"
+    return str
 
 def client_sync_subasync_out_totalsize(func):
     str = ""

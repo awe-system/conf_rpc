@@ -380,8 +380,12 @@ def show_func_head(classname, func):
 def show_func_end():
     print "}\n"
 
+def show_sync_func(func):
+    print ONE_TEB + "void *internal_pri = comm_io_contexts.context(this);"
+    print ONE_TEB + "return cli." + func[
+        "func_name"] + "(" + gfs.client_syncfunc_values(func) + ");"
 
-def show_direct_func(func):
+def show_async_func(func):
     print ONE_TEB + "void *internal_pri = comm_io_contexts.context(this);"
     print ONE_TEB + "return cli." + func[
         "func_name"] + "(" + gfs.client_func_values(func) + ");"
@@ -407,8 +411,10 @@ def show_wait_func(func):
 def show_func_body(func):
     if (func["type"] == "async" and func["subtype"] == "sync"):
         show_wait_func(func)
+    elif (func["type"] == "sync"):
+        show_sync_func(func)
     else:
-        show_direct_func(func)
+        show_async_func(func)
 
 
 def show_dynamic(classname, funcs):

@@ -249,7 +249,7 @@ def show_sync_client_func(func):
     print ONE_TEB + "__sync_add_and_fetch(&cb->snd_ref_cnt, 1);"
     show_before_snd()
 
-    print ONE_TEB + "lt_data_t *data = new lt_data_t;"
+    print ONE_TEB + "lt_data_t *data = new lt_data_t();"
     print ONE_TEB + func[
         "func_name"] + "_gendata(" + put_sync_gendata_params_no_def(
         func) + " &_internal_sync_cond, internal_pri, data);"
@@ -289,7 +289,7 @@ def show_async_client_func(func):
     show_notsession_check()
     print ONE_TEB + "__sync_add_and_fetch(&cb->snd_ref_cnt, 1);"
     show_before_snd()
-    print ONE_TEB + "lt_data_t *data = new lt_data_t;"
+    print ONE_TEB + "lt_data_t *data = new lt_data_t();"
     print ONE_TEB + func[
         "func_name"] + "_gendata(" + put_async_gendata_params_no_def(
         func) + " internal_pri, data);"

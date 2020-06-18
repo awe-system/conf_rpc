@@ -623,6 +623,8 @@ def show_mark_rcvd():
 def show_handler_rcvd():
     print "void " + classname + "_client_callback::handler_rcvd(lt_session_cli_safe *sess)"
     print "{"
+    print ONE_TEB + classname + "_client * cli = (" + classname +"_client *)sess->get_cli();"
+    print ONE_TEB + "__sync_add_and_fetch(&cli->cb_ref_cnt, 1);"
     print ONE_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
     print "}\n"
 

@@ -678,6 +678,7 @@ def show_byinput_starlog(name):
 
 
 def show_byinput_endlog(name):
+    print THREE_TEB + "__sync_add_and_fetch(&cli->cb_ref_cnt, 1);"
     print THREE_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
     print THREE_TEB + "AWE_MODULE_DEBUG(\"communicate callback\","
     print THREE_TEB + ONE_TEB + "\"" + name + " Err end cb_normal_cnt [%lld] cb_cnt [%lld] err_internal [%d]\\n\""

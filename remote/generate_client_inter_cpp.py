@@ -598,33 +598,33 @@ def show_by_output_cases():
 def show_mark_sent():
     print "void " + classname + "_client_callback::mark_sent(void *internal_pri,lt_data_t *data)"
     print "{"
-    print ONE_TEB + "internal_sent_data_map.in(internal_pri,(void *)data);\n"
+    print ONE_TEB + "internal_sent_data_map.in(internal_pri,(void *)data);"
     print "}\n"
 
 def show_mark_rcvd():
     print "void " + classname + "_client_callback::mark_rcvd(void *internal_pri)"
     print "{"
-    print ONE_TEB + "auto sent_data = (lt_data_t *)internal_sent_data_map.out(internal_pri);\n"
-    print ONE_TEB + "assert(sent_data);\n"
-    print ONE_TEB + "delete sent_data;\n"
+    print ONE_TEB + "auto sent_data = (lt_data_t *)internal_sent_data_map.out(internal_pri);"
+    print ONE_TEB + "assert(sent_data);"
+    print ONE_TEB + "delete sent_data;"
     print "}\n"
 
 def show_handler_rcvd():
     print "void " + classname + "_client_callback::handler_rcvd()"
     print "{"
-    print ONE_TEB + "__sync_add_and_fetch(&cb_cnt, 1);\n"
+    print ONE_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
     print "}\n"
 
 
 def show_clear_by_input():
     print "void " + classname + "_client_callback::clear_by_input()"
     print "{"
-    print ONE_TEB + "std::map<void *, void*> out_map;\n"
-    print ONE_TEB + "internal_sent_data_map.cp(out_map)\n;"
-    print ONE_TEB + "for(auto it : out_map)\n"
-    print ONE_TEB + "{\n"
-    print TWO_TEB + "lt_data_t * sent_data = static_cast<lt_data_t *>(it.second);\n"
-    print TWO_TEB + "handler_by_input(sent_data, -RPC_ERROR_TYPE_NET_BROKEN);\n"
+    print ONE_TEB + "std::map<void *, void*> out_map;"
+    print ONE_TEB + "internal_sent_data_map.cp(out_map);"
+    print ONE_TEB + "for(auto it : out_map)"
+    print ONE_TEB + "{"
+    print TWO_TEB + "lt_data_t * sent_data = static_cast<lt_data_t *>(it.second);"
+    print TWO_TEB + "handler_by_input(sent_data, -RPC_ERROR_TYPE_NET_BROKEN);"
     print ONE_TEB + "}\n"
     print "}\n"
 

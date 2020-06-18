@@ -70,7 +70,8 @@ def show_client_common():
     print TWO_TEB + "cb_cnt  = cb->cb_cnt;"
     print TWO_TEB + "snd_cnt = cb->snd_ref_cnt;"
     print TWO_TEB + " usleep(1000);"
-    print ONE_TEB + "} while ( cb_cnt != snd_cnt );"
+    print ONE_TEB + "} while ( cb_cnt < snd_cnt );"
+    print ONE_TEB + "assert(cb_cnt == snd_cnt);"
     print ONE_TEB + "cb->clear_by_input();"
     print ONE_TEB + "cb->cb_cnt      = 0;"
     print ONE_TEB + "cb->snd_ref_cnt      = 0;"
@@ -232,6 +233,7 @@ def show_before_snd():
 
 
 def show_after_snd():
+    print ONE_TEB + "if(err_report){__sync_add_and_fetch(&cb->cb_cnt, 1);}"
     print ONE_TEB + "AWE_MODULE_DEBUG(\"communicate snd\","
     print TWO_TEB + "\"after snd sess [%p] cb [%p] nosession_cnt [%lld] snd_ref_cnt [%lld] \\n\""
     print TWO_TEB + "\"gendata_ref_cnt [%lld]  cb_cnt [%lld]\\n\""

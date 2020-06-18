@@ -115,14 +115,13 @@ def show_client_callback(classname):
     print "private:"
     print ONE_TEB + classname + "_callback_handler *cb_handler;"
     print ONE_TEB + "lt_thread_server server;\n"
-    print ONE_TEB + "safe_voidp_map internal_sent_data_map;\n"
     print "public:\n"
+    print ONE_TEB + "long long snd_ref_cnt = 0;"
     print ONE_TEB + "long long disconnected_cnt = 0;"
     print ONE_TEB + "long long disconninthread_cnt = 0;"
     print ONE_TEB + "long long cb_cnt = 0;"
     print ONE_TEB + "long long cb_error_cnt = 0;"
     print ONE_TEB + "long long cb_normal_cnt = 0;"
-    print(ONE_TEB + "long long snd_ref_cnt = 0;")
     print(ONE_TEB + "long long gendata_ref_cnt = 0;")
     print(ONE_TEB + "long long nosession_cnt = 0;")
     print(ONE_TEB + "long long connect_cnt = 0;")
@@ -132,14 +131,10 @@ def show_client_callback(classname):
     print ONE_TEB  + "virtual ~"+ classname + "_client_callback();\n"
 
     print ONE_TEB + "void disconnected_inthread(lt_session *sess);\n"
-    print ONE_TEB + "void mark_sent(void * internal_pri, lt_data_t * data);\n"
-    print ONE_TEB + "void clear_by_input();\n"
-    print "private:"
-    print ONE_TEB + "void mark_rcvd(void * internal_pri);\n"
-    print "private:"
-    print ONE_TEB + "void handler_rcvd() override;\n"
-    print ONE_TEB + "void handler_by_output(lt_data_t *received_data) override;\n"
-    print ONE_TEB + "void handler_by_input(lt_data_t *sent_data, int error_internal) override;\n"
+    print "public:"
+    print ONE_TEB + "void handler_rcvd(lt_session_cli_safe *sess) override;\n"
+    print ONE_TEB + "void handler_by_output(lt_session_cli_safe *sess, lt_data_t *received_data) override;\n"
+    print ONE_TEB + "void handler_by_input(lt_session_cli_safe *sess, lt_data_t *sent_data, int error_internal) override;\n"
     print "protected:"
     print ONE_TEB + "virtual void disconnected(lt_session *sess) override;"
     print("};\n")
@@ -148,8 +143,12 @@ def show_client_callback(classname):
 def show_client_head():
     print("class " + classname + "_client")
     print ("{")
+    print("public:")
+    print ONE_TEB + "long long cb_ref_cnt = 0;"
+    print ONE_TEB + "long long snd_ref_cnt = 0;"
     print("private:")
     print(ONE_TEB + classname + "_client_callback *cb;")
+    print(ONE_TEB + "safe_voidp_map internal_sent_data_map;\n")
     print(ONE_TEB + "rw_lock_t m;")
     print(ONE_TEB + "lt_session_cli_safe *sess;")
     print(ONE_TEB + "std::string _ip = \"\";\n")
@@ -157,10 +156,13 @@ def show_client_head():
     print("public:")
     print(
         ONE_TEB + classname + "_client(" + classname + "_client_callback *_cb);\n")
+    print(ONE_TEB + "void clear_by_input();\n")
     print(ONE_TEB + "void wait_done();\n")
     print(ONE_TEB + "int connect(const std::string &ip);\n")
     print(ONE_TEB + "void disconnect();\n")
     print(ONE_TEB + " void *get_sess(){ return sess;}\n")
+    print ONE_TEB + "void mark_sent(void * internal_pri, lt_data_t * data);\n"
+    print ONE_TEB + "void mark_rcvd(void * internal_pri);\n"
 
 
 def client_func_params(func):

@@ -533,7 +533,7 @@ def show_sync_notify(func):
         func) + "sizeof(error_internal));"
     print THREE_TEB + "unsigned char *res_buf = res_data.get_buf();"
     show_by_output_gen_res_buf(func)
-    print THREE_TEB + classname + "_client * cli = (" + classname +"_client *)sess->get_cli();"
+    print THREE_TEB + classname + "_client * cli = (" + classname + "_client *)sess->get_cli();"
     print THREE_TEB + "cli->mark_rcvd(internal_pri);"
     print THREE_TEB + "lt_data_translator::by_uint(error_internal, res_buf);"
     print THREE_TEB + "lt_condition *_internal_sync_cond = (lt_condition *) internal_sync_cond_p;"
@@ -564,7 +564,7 @@ def get_async_callback_params(func):
 
 
 def show_async_callback(func):
-    print THREE_TEB + classname + "_client * cli = (" + classname +"_client *)sess->get_cli();"
+    print THREE_TEB + classname + "_client * cli = (" + classname + "_client *)sess->get_cli();"
     print THREE_TEB + "cli->mark_rcvd(internal_pri);"
     print THREE_TEB + "cb_handler->" + func[
         "func_name"] + "_callback(" + get_async_callback_params(
@@ -623,7 +623,7 @@ def show_mark_rcvd():
 def show_handler_rcvd():
     print "void " + classname + "_client_callback::handler_rcvd(lt_session_cli_safe *sess)"
     print "{"
-    print ONE_TEB + classname + "_client * cli = (" + classname +"_client *)sess->get_cli();"
+    print ONE_TEB + classname + "_client * cli = (" + classname + "_client *)sess->get_cli();"
     print ONE_TEB + "__sync_add_and_fetch(&cli->cb_ref_cnt, 1);"
     print ONE_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
     print "}\n"
@@ -698,8 +698,13 @@ def show_by_input_cases():
             print THREE_TEB + "void *internal_sync_cond_p = lt_data_translator::to_void_p(buf);"
             print THREE_TEB + "lt_data_t res_data;"
             print THREE_TEB + "lt_condition *_internal_sync_cond = (lt_condition *) internal_sync_cond_p;"
-            print THREE_TEB + "void * internal_pri;"
+            print THREE_TEB + "void * internal_pri = lt_data_translator::to_void_p(buf);"
+            print THREE_TEB + classname + "_client * cli = (" + classname + "_client *)sess->get_cli();"
+            print THREE_TEB + "cli->mark_rcvd(internal_pri);"
             print THREE_TEB + "_internal_sync_cond->notify(res_data, error_internal);"
+            print THREE_TEB + "__sync_add_and_fetch(&cli->cb_ref_cnt, 1);"
+            print THREE_TEB + "__sync_add_and_fetch(&cb_cnt, 1);"
+
         else:
             for param in func["pt_params"]:
                 print THREE_TEB + param_declare_tab[

@@ -134,7 +134,7 @@ class params_obj(object):
     def append(self, para):
         self.add_param(para)
 
-    def get_params_list_str(self, prefix = None, capitalize = False, withblank = False, start = 0):
+    def get_params_list_str(self, prefix=None, capitalize=False, withblank=False, start=0):
         str = "" if not withblank else "("
         has_prefix = False
         if prefix is not None:
@@ -153,10 +153,6 @@ class params_obj(object):
         str += "" if not withblank else ")"
 
         return str
-
-    def set_params_capitalize(self):
-        for para in self.params:
-            para.name = para.name.capitalize()
 
 
 class struct_obj(params_obj):

@@ -60,6 +60,7 @@ def load_client(child):
     res.update(
         {"withping": bool_trans(safegetattr(child, "withping", "false"))})
     if client_type == "C++" or client_type == "python" \
+            or client_type == "go"\
             or client_type == "python/C++":
         namespace = child.getAttribute("namespace")
         res.update({"namespace": namespace})

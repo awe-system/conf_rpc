@@ -134,20 +134,24 @@ class params_obj(object):
     def append(self, para):
         self.add_param(para)
 
-    def get_params_list_str(self, prefix=None, capitalize=False, withblank=False, start=0):
+    def get_params_list_str(self, prefix=None, capitalize=False, withblank=False, start=0, end=0):
         str = "" if not withblank else "("
         has_prefix = False
+        params_list = None
+        if end != 0:
+            params_list = self.params[start:end]
+        else:
+            params_list = self.params[start:]
+
         if prefix is not None:
             has_prefix = True
-        for index, p in enumerate(self.params):
-            if index < start:
-                continue
+        for index, p in enumerate(params_list):
             name_str = p.name.capitalize() if capitalize else p.name
             if has_prefix:
                 str += prefix + "." + name_str
             else:
                 str += name_str
-            if index < len(self.params) - 1:
+            if index < len(params_list) - 1:
                 str += ", "
 
         str += "" if not withblank else ")"
@@ -244,19 +248,20 @@ class function_obj(object):
     # 函数定义或声明时的输入和返回参数列表字符串:(in_val in_type,...) [(ret_val ret_type,...)]
     def _get_func_decl_para_list_str(self):
         str = "("
-        str += self._get_para_list_str(self.params.params)
+        str += self._get_para_list_str(self.params)
         str += ")"
         if len(self.return_values) > 0:
-            str += " (" + self._get_para_list_str(self.return_values) + ")"
+            str += " (" + self._get_para_list_str(self.return_values, True, False) + ")"
         return str
 
-    def _get_para_list_str(self, params, with_typename = True):
+    def _get_para_list_str(self, params, with_typename=True, with_var_name=True):
         str = ""
         for index, para in enumerate(params):
-            str += para.name
+            if with_var_name:
+                str += para.name
             if with_typename:
                 str += " " + para.type
-            if index < len(self.params) - 1:
+            if index < len(params) - 1:
                 str += ", "
         return str
 
@@ -284,6 +289,10 @@ class xml_define_function(function_obj):
         self.param_in = params_obj("param_in")
         self.param_out = params_obj("param_out")
         self.pt_params = params_obj("obj")
+
+        # 同步函数 返回值第一个是错误码
+        if not self.is_async:
+            self.param_out.append(var_name("_go_err", "error"))
 
         if str(name).lower() == "ping_internal":
             self.is_ping_internal = True
@@ -318,6 +327,7 @@ class xml_define_function(function_obj):
         else:
             self.return_values = copy.copy(self.param_out)
 
+    # 初始化附属数据 : response request 结构体
     def _init_subsidiary_data(self):
         self.request_struct = struct_obj(self.func_name.lower() + "_request")
         var_functype = var_name("functype", "uint32")
@@ -327,9 +337,19 @@ class xml_define_function(function_obj):
 
         self.response_struct = struct_obj(self.func_name.lower() + "_response")
         self.response_struct.add_param(var_functype)
-        for para in self.param_out:
-            self.response_struct.add_param(para)
 
+        for para in self.param_out:
+            # 同步时的error参数不加入response结构体
+            if para.type is not "error":
+                self.response_struct.add_param(para)
+
+        # 同步函数根据通信协议，添加sync_cond uint64
+        if not self.is_async:
+            self.var_sync_cond = var_name("sync_cond", "uint64", default_value=0)
+            self.request_struct.add_param(self.var_sync_cond)
+            self.response_struct.add_param(self.var_sync_cond)
+
+    # 如果函数为异步，初始化异步所需数据结构： 提供给外部的api回调函数类型，param 结构体，提供给go rpc调用的回调函数
     def _init_async_data(self):
         self.callback_api_functype = function_obj("Callback_func_" + self.func_name.lower())
         for para in self.param_out.params:
@@ -368,16 +388,25 @@ class xml_define_function(function_obj):
 
         str += ONE_TAB + "req := " + self.request_struct.name + " {\n"
         str += TWO_TAB + self.const_call_back_func_enum_str + "," + "\n"
-        str += TWO_TAB + self.request_struct.get_params_list_str(None, False, False, 1) + "}\n"
+
+        # 同步函数 request结构定义时最后一个 sync_cond 直接设置为default_value
+        if not self.is_async:
+            str += TWO_TAB + self.request_struct.get_params_list_str(None, False, False, start=1, end=-1)
+            str += ", " + repr(self.var_sync_cond.default_value)
+        else:
+            str += TWO_TAB + self.request_struct.get_params_list_str(None, False, False, start=1)
+        str += "}\n"
 
         str += ONE_TAB + "var reply " + self.response_struct.name + "\n"
         str += ONE_TAB + "reply." + self.response_struct.params[0].name.capitalize()\
                + " = " + self.const_call_back_func_enum_str + "\n"
 
+        # 同步函数调用go rpc以及返回值
         if not self.is_async:
-            str += ONE_TAB + implementer.name + ".client.Call(\"" + package_name + "\""
-            str += ONE_TAB + ", req, &reply)\n"
-            str += ONE_TAB + "return " + self.return_values.get_params_list_str("reply", True)
+            str += ONE_TAB + self.return_values[0].name + " := " + implementer.name + ".client.Call(\"" + package_name + "\""
+            str += ", req, &reply)\n"
+            str += ONE_TAB + "return " + self.return_values[0].name + ", " + self.return_values.get_params_list_str("reply", True, False, 1) + "\n"
+        # 异步函数 调用Go()就结束
         else:
             str += ONE_TAB + "param := " + self.param_struct.name + "{&req, callback}\n"
             str += ONE_TAB + implementer.name + ".client.Go(" + "\"" + self.func_name + "\","\
@@ -440,7 +469,7 @@ class global_config(object):
 
 class global_manager(object):
     config = global_config()
-    xml_funcs = {}
+    xml_funcs = []
     primary_funcs = {}
     default_ipaddr = var_name("default_ip_address", "string")
     port_content = var_name("", "string")
@@ -468,7 +497,7 @@ class global_manager(object):
             fn = xml_define_function(func)
             if fn.is_ping_internal:
                 self.func_ping_internal = fn
-            self.xml_funcs[fn.func_name.lower()] = fn
+            self.xml_funcs.append(fn)
 
     def _init_import(self):
         self.import_decl.add_module("fmt", "os/exec", "trace_rpc")
@@ -486,7 +515,7 @@ class global_manager(object):
 
     def _init_interface(self, name):
         self.global_interface.name = name
-        for func in self.primary_funcs.values() + self.xml_funcs.values():
+        for func in self.primary_funcs.values() + self.xml_funcs:
             if hasattr(func, "is_ping_internal") and func.is_ping_internal == True:
                 continue
             global_manager.global_interface.append(func)
@@ -494,7 +523,7 @@ class global_manager(object):
     def show_info(self):
         self.config.show_info()
         print("XML defined functions:")
-        for key, func in self.xml_funcs.items():
+        for func in self.xml_funcs:
             func.show_info()
         print("Primary functions:")
         for key, func in self.primary_funcs.items():
@@ -529,14 +558,20 @@ class code_writer(object):
 
     def write_const_global_func_type_enums(self, xml_funcs, port):
         str = "\nconst (\n"
-        for name, func in xml_funcs.items():
+        func_list = list(xml_funcs)
+        ping_is_found = False
+        for func in func_list:
+            if func.is_ping_internal and not ping_is_found:
+                func_list.append(func)
+                ping_is_found = True
+                continue
             str += (ONE_TAB + func.get_const_func_type_enum_str(port) + " = iota\n")
         str += ")\n"
         print(str)
 
     def write_call_back_api_typedef(self):
         str = ""
-        for func in manager.xml_funcs.values():
+        for func in manager.xml_funcs:
             if not func.is_async or not hasattr(func, "callback_api_functype"):
                 continue
             str += func.callback_api_functype.get_func_typedef_str()
@@ -552,7 +587,7 @@ class code_writer(object):
         print(str)
 
     def write_async_func_relied_data(self):
-        for func in manager.xml_funcs.values():
+        for func in manager.xml_funcs:
             if not func.is_ping_internal:
                 print(func.request_struct.get_declaration_str())
                 print(func.response_struct.get_declaration_str())
@@ -612,7 +647,7 @@ class code_writer(object):
     def create_xml_funcs(self):
         str = ""
         impl = manager.interface_impl.impl_varname
-        for func in manager.xml_funcs.values():
+        for func in manager.xml_funcs:
             if func.is_ping_internal:
                 continue
             str += func.get_self_func_content_str(impl)
@@ -696,7 +731,7 @@ writer = code_writer()
 
 
 def test():
-    for func in manager.xml_funcs.values():
+    for func in manager.xml_funcs:
         print("async:", func.is_async)
         print("signature:")
         print(func.get_func_signature())

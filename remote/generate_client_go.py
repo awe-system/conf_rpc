@@ -6,7 +6,6 @@ import copy
 import gfuncs as gfs
 from generate_client_py import BLANK, ONE_TAB, TWO_TAB, THREE_TAB, FOUR_TAB
 
-FUNC_NAME_SET_IP = "set_ip_address"
 FUNC_NAME_CONNECT = "connect"
 
 class import_declaration(object):
@@ -172,7 +171,7 @@ class struct_obj(params_obj):
         str += "}\n"
         return str
 
-
+# interface 对象，存储函数列表在继承的params_obj
 class interface_obj(params_obj):
 
     def __init__(self, name):
@@ -185,7 +184,7 @@ class interface_obj(params_obj):
         str += "}\n"
         return str
 
-
+# interface 实现者，
 class interface_implementer(object):
 
     # interface: interface_obj
@@ -260,7 +259,9 @@ class function_obj(object):
             if with_var_name:
                 str += para.name
             if with_typename:
-                str += " " + para.type
+                if with_var_name or index > 0:
+                    str += " "
+                str += para.type
             if index < len(params) - 1:
                 str += ", "
         return str
@@ -471,7 +472,7 @@ class global_manager(object):
     config = global_config()
     xml_funcs = []
     primary_funcs = {}
-    default_ipaddr = var_name("default_ip_address", "string")
+
     port_content = var_name("", "string")
     rpc_client = struct_obj("rpc_client".capitalize())
     global_interface = interface_obj("interface")
@@ -504,14 +505,15 @@ class global_manager(object):
 
     def _init_primary_funcs(self):
         func_connect = function_obj(FUNC_NAME_CONNECT.capitalize())
-        func_set_ip = function_obj(FUNC_NAME_SET_IP.capitalize())
-        func_set_ip.add_param(var_name("ip", "string"))
+        func_connect.add_param(var_name("ip", "string"))
+        func_connect.add_return_value(var_name("err", "error"))
         self.primary_funcs[FUNC_NAME_CONNECT] = func_connect
-        self.primary_funcs[FUNC_NAME_SET_IP] = func_set_ip
+
 
     def _init_rpc_client(self):
         global_manager.rpc_client.add_param(var_name("client", "* trace_rpc.Client"))
         global_manager.rpc_client.add_param(var_name("ipaddr", "string"))
+        global_manager.rpc_client.add_param(var_name("is_connected", "bool"))
 
     def _init_interface(self, name):
         self.global_interface.name = name
@@ -551,10 +553,6 @@ class code_writer(object):
         str = const_decl.get_const_var_decl_str()
         print(str)
 
-    def write_default_ipaddr(self, ip_var):
-        str = "\n"
-        str += "var " + ip_var.name + " " + ip_var.type + " = " + "\"127.0.0.1\"\n"
-        print(str)
 
     def write_const_global_func_type_enums(self, xml_funcs, port):
         str = "\nconst (\n"
@@ -595,28 +593,10 @@ class code_writer(object):
                 print(func.param_struct.get_declaration_str())
                 print(func.get_call_back_func_content_str())
 
-    # FIX: 接口需要优化
-    def create_set_ip_addr_func(self, interface_impl):
-        func = interface_impl.get_func(FUNC_NAME_SET_IP)
-        impl_varname = interface_impl.impl_varname
-
-        str = "func "
-        str += func.get_func_signature_with_impl(impl_varname)
-        str += " {\n"
-        str += ONE_TAB + "cmd_str := \"ping \" + ip + \" -c 1\"\n"
-        str += ONE_TAB + "err := exec.Command(\"bash\", \"-c\", cmd_str).Run()\n"
-        str += ONE_TAB + "if err != nil {\n"
-        str += TWO_TAB + "fmt.Println(\"Go client RPC:Invalid ip address\")\n"
-        str += TWO_TAB + "panic(err.Error())\n"
-        str += ONE_TAB + "} else {\n"
-        str += TWO_TAB + impl_varname.name +".ipaddr = ip\n"
-        str += ONE_TAB + "}\n"
-        str += "}\n"
-        print(str)
 
     def create_connect_func(self, interface_impl):
         package_name = manager.config.package_name
-        default_ip_var_name = manager.default_ipaddr
+
         func_ping_internal = manager.func_ping_internal
         port = manager.port_content.name
         func = interface_impl.get_func(FUNC_NAME_CONNECT)
@@ -626,22 +606,18 @@ class code_writer(object):
         str += func.get_func_signature_with_impl(impl_varname)
         str += " {\n"
         str += ONE_TAB + "var err error\n"
-        str += ONE_TAB + "var ip_addr string\n"
-        str += ONE_TAB + "if len(" + impl_varname.name + ".ipaddr) == 0 {\n"
-        str += TWO_TAB + "ip_addr = " + default_ip_var_name.name + "\n"
-        str += ONE_TAB + "} else {\n"
-        str += TWO_TAB + "ip_addr =" + impl_varname.name + ".ipaddr\n"
-        str += ONE_TAB + "}\n"
+        str += ONE_TAB + impl_varname.name + ".ipaddr = ip\n"
         str += ONE_TAB + "trace_rpc.PingReqFnType = " + func_ping_internal.const_call_back_func_enum_str + "\n"
-        str += ONE_TAB + impl_varname.name + ".client, err = trace_rpc.Dial(ip_addr + \":\" + " + port + ")\n"
+        str += ONE_TAB + impl_varname.name + ".client, err = trace_rpc.Dial(ip + \":\" + " + port + ")\n"
         str += ONE_TAB + "if err != nil {\n"
-        str += TWO_TAB + "panic(err.Error())\n"
+        str += TWO_TAB + "return err\n"
         str += ONE_TAB + "}\n"
+        str += ONE_TAB + impl_varname.name + ".is_connected = true\n"
+        str += ONE_TAB + "return nil\n"
         str += "}\n"
         print(str)
 
     def create_primary_funcs(self):
-        self.create_set_ip_addr_func(manager.interface_impl)
         self.create_connect_func(manager.interface_impl)
 
     def create_xml_funcs(self):
@@ -662,7 +638,6 @@ class code_writer(object):
         self.write_package_header(package_name)
         self.write_import()
         self.write_port(port, package_name)
-        self.write_default_ipaddr(manager.default_ipaddr)
         self.write_const_global_func_type_enums(xml_funcs, port)
         self.write_rpc_client_struct_def()
         self.write_call_back_api_typedef()

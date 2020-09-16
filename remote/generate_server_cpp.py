@@ -8,7 +8,7 @@ THREE_TEB = "            "
 
 param_tab = {
     "string": "std::string &",
-    "char_p": "char * &",
+    "char_p": "const char * &",
     "uint": "unsigned int &",
     "ulong": "unsigned long &",
     "bool": "bool &",
@@ -18,7 +18,7 @@ param_tab = {
 
 param_declare_tab = {
     "string": "std::string",
-    "char_p": "char *",
+    "char_p": "const char *",
     "uint": "unsigned int",
     "ulong": "unsigned long",
     "bool": "bool",
@@ -29,7 +29,7 @@ param_declare_tab = {
 
 gen_data_param_tab = {
     "string": "std::string",
-    "char_p": "char *",
+    "char_p": "const char *",
     "uint": "unsigned int",
     "ulong": "unsigned long",
     "bool": "bool",
